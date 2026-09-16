@@ -1,8 +1,8 @@
 // @ts-nocheck -- mechanically split from OrcaRuntimeService; behavior is covered by AST equivalence and characterization tests.
-import { OrcaRuntimeWithResolveKnownWorkspaceFileTarget } from './orca-runtime-resolve-known-workspace-file-target'
+import { OrcaRuntimeWithTriviumWorkspaceTarget } from './orca-runtime-trivium-workspace-target'
 import type { PtyIncarnationId } from '../../shared/pty-incarnation'
 
-export class OrcaRuntimeWithInvalidateAllHandlesForPty extends OrcaRuntimeWithResolveKnownWorkspaceFileTarget {
+export class OrcaRuntimeWithInvalidateAllHandlesForPty extends OrcaRuntimeWithTriviumWorkspaceTarget {
   protected invalidateAllHandlesForPty(ptyId: string, preserveHandle?: string): Set<string> {
     const incarnationHandle = this.handleByPtyIncarnation.get(ptyId)?.handle
     const preallocatedHandle = this.handleByPtyId.get(ptyId)

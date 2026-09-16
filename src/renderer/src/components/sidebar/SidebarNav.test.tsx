@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => ({
   openActivityPage: vi.fn(),
   openMobilePage: vi.fn(),
   openArtifactsPage: vi.fn(),
+  openTriviumPage: vi.fn(),
   openModal: vi.fn(),
   updateSettings: vi.fn(),
   refreshPreflightStatus: vi.fn(),
@@ -92,7 +93,8 @@ import SidebarNav, {
   shouldShowAutomationsButton,
   shouldShowArtifactsButton,
   shouldShowMobileButton,
-  shouldShowSetupGuideEntry
+  shouldShowSetupGuideEntry,
+  shouldShowTriviumButton
 } from './SidebarNav'
 
 function gitRepo(): Repo {
@@ -133,6 +135,7 @@ function setSidebarState({
     openActivityPage: mocks.openActivityPage,
     openMobilePage: mocks.openMobilePage,
     openArtifactsPage: mocks.openArtifactsPage,
+    openTriviumPage: mocks.openTriviumPage,
     openModal: mocks.openModal,
     updateSettings: mocks.updateSettings,
     preflightStatus: { glab: { installed: false } },
@@ -275,6 +278,22 @@ describe('SidebarNav', () => {
     expect(shouldShowArtifactsButton({})).toBe(false)
     expect(shouldShowArtifactsButton({ showArtifactsButton: true })).toBe(true)
     expect(shouldShowArtifactsButton({ showArtifactsButton: false })).toBe(false)
+  })
+
+  it('shows the Trivium entry by default and hides it only when switched off', () => {
+    expect(shouldShowTriviumButton(null)).toBe(true)
+    expect(shouldShowTriviumButton({})).toBe(true)
+    expect(shouldShowTriviumButton({ showTriviumButton: true })).toBe(true)
+    expect(shouldShowTriviumButton({ showTriviumButton: false })).toBe(false)
+  })
+
+  it('opens Trivium from the sidebar', async () => {
+    setSidebarState({ settings: getDefaultSettings('/tmp') })
+    const container = await renderSidebarNav()
+
+    await clickButton(getButtonByText(container, 'Trivium'))
+
+    expect(mocks.openTriviumPage).toHaveBeenCalledOnce()
   })
 
   it('opens Artifacts from the sidebar', async () => {

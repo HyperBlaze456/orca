@@ -1,7 +1,6 @@
 import { chmod, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
-import { accessSync, constants, existsSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { delimiter, dirname, isAbsolute, join } from 'node:path'
+import { dirname, isAbsolute, join } from 'node:path'
 import {
   addClaudeTeammateModeAuto,
   addClaudeTeammateModeInProcess,
@@ -10,6 +9,7 @@ import {
 } from '../../shared/claude-agent-teams-tmux-compat'
 import { getOrcaCliCommandNameForPlatform } from '../../shared/orca-cli-command-name'
 import { resolvePathEnvKey } from '../pty/windows-path-segment-merge'
+import { findExecutableOnPath, isExecutableFile } from '../startup/path-executable-lookup'
 
 export type ClaudeAgentTeamsLaunchPlan = {
   command: string
@@ -101,32 +101,6 @@ function bundledLauncherPath(): string | null {
     return join(process.resourcesPath, 'bin', 'orca.exe')
   }
   return null
-}
-
-function findExecutableOnPath(command: string, pathValue: string | undefined): string | null {
-  for (const directory of pathValue?.split(delimiter) ?? []) {
-    // Why: empty and relative PATH entries resolve against a cwd we do not control, which is the hijack we are avoiding.
-    if (!directory || !isAbsolute(directory)) {
-      continue
-    }
-    const candidate = join(directory, command)
-    if (isExecutableFile(candidate)) {
-      return candidate
-    }
-  }
-  return null
-}
-
-function isExecutableFile(candidate: string): boolean {
-  try {
-    if (!existsSync(candidate)) {
-      return false
-    }
-    accessSync(candidate, process.platform === 'win32' ? constants.F_OK : constants.X_OK)
-    return true
-  } catch {
-    return false
-  }
 }
 
 // Why: an unqualified command name is resolved against the invoking pane's cwd (always on cmd.exe, and via `.`/empty

@@ -5309,7 +5309,8 @@
           "fee535205b": "Tasks",
           "d599269755": "Hide from sidebar",
           "artifacts": "Artifacts",
-          "skills": "Skills"
+          "skills": "Skills",
+          "trivium": "Trivium"
         },
         "SidebarRepositoryFilterSection": {
           "d3a9c4cea1": "Clear",
@@ -6624,7 +6625,9 @@
           "showPinnedWorktreesInGroups": {
             "title": "Also show pinned worktrees in their original lists",
             "description": "Pinned worktrees stay in Pinned and also appear in All, Project, Status, and PR."
-          }
+          },
+          "showTriviumButton": "Show Trivium Button",
+          "showTriviumButtonDescription": "Show the Trivium harness shortcut in the sidebar."
         },
         "AutoRenameBranchFromWorkSetting": {
           "1626524572": "Nautilus",
@@ -9093,7 +9096,12 @@
               "close": "close",
               "notification": "notification area",
               "background": "background"
-            }
+            },
+            "showTriviumButton": "Show Trivium Button",
+            "showTriviumButtonDescription": "Show the Trivium button at the top of the left sidebar.",
+            "triviumKeyword": "trivium",
+            "harnessKeyword": "harness",
+            "goalKeyword": "goal"
           }
         },
         "auto": {
@@ -16809,6 +16817,110 @@
       "HostedReviewUnlinkMenuItem": {
         "label": "Unlink {{value0}} from workspace",
         "description": "Orca will hide {{value0}} {{value1}} details for this workspace. The {{value0}} and branch on {{value2}} won’t be changed."
+      },
+      "trivium": {
+        "TriviumCampaignsSection": {
+          "title": "Campaigns",
+          "closed": "{{count}} closed",
+          "empty": "No open Campaign.",
+          "goal": "Goal",
+          "currentFeature": "Current Feature",
+          "holder": "Holder",
+          "generation": "Generation"
+        },
+        "TriviumEscalationsSection": {
+          "title": "Escalations",
+          "empty": "Nothing is waiting on a decision from you."
+        },
+        "TriviumGoalsSection": {
+          "shared": "Shared",
+          "title": "Goals",
+          "counts": "{{adopted}}/{{normative}} adopted · G0 {{g0}} · G1 {{g1}} · G2 {{g2}} · G3 {{g3}}",
+          "empty": "No Goals yet. Run a Goal interview to adopt one.",
+          "dependsOn": "Depends on",
+          "candidatesToApprove": "{{count}} to approve"
+        },
+        "TriviumHeader": {
+          "back": "Back",
+          "title": "Trivium",
+          "workerWorktree": "Worker worktree — showing the main worktree’s harness",
+          "refresh": "Refresh",
+          "harnessRoot": "Harness root",
+          "event": "Event",
+          "revision": "Revision",
+          "workerWorktreeOf": "Worker worktree — showing the harness of {{repository}}"
+        },
+        "TriviumHistorySection": {
+          "title": "History",
+          "campaigns": "Campaigns",
+          "features": "Features",
+          "publications": "Publications",
+          "theoryNodes": "Theory nodes",
+          "warnings": "Warnings"
+        },
+        "TriviumInterviewsSection": {
+          "title": "Interviews",
+          "empty": "No interview session is open."
+        },
+        "TriviumMilestoneSection": {
+          "title": "Milestone",
+          "empty": "No Campaign is standing at a milestone.",
+          "noSummary": "The milestone recorded no summary.",
+          "unknowns": "Unknowns",
+          "contradictions": "Contradictions",
+          "promotionCandidates": "Promotion candidates"
+        },
+        "TriviumStateScreens": {
+          "copyCommand": "Copy command",
+          "loading": "Reading harness state…",
+          "noHarnessTitle": "No Trivium harness here",
+          "noHarnessAtPath": "There is no .trivium directory at or above {{path}}. Initialize the harness to start tracking Goals, Campaigns and tickets.",
+          "noHarness": "There is no .trivium directory in this workspace. Initialize the harness to start tracking Goals, Campaigns and tickets.",
+          "unsupportedTitle": "Trivium is not available on this host",
+          "unsupportedHost": "Trivium reads the workspace on the execution host that owns it. The host {{host}} does not answer Trivium requests yet.",
+          "unsupportedNoHost": "Trivium reads the workspace on the execution host that owns it. This workspace has no host that answers Trivium requests yet.",
+          "unavailableTitle": "The trivium program did not run",
+          "unavailableHost": "The host {{host}} accepted the request but could not start trivium.",
+          "unavailable": "The host accepted the request but could not start trivium.",
+          "executableOverride": "Set {{variable}} on the execution host to point at the executable.",
+          "errorTitle": "Could not read the harness",
+          "errorFallback": "The status request failed without a message.",
+          "retry": "Retry",
+          "remoteExecutionHost": "Trivium reads the harness through the process that owns the workspace filesystem, and that process does not serve this host yet.",
+          "serviceErrorTitle": "Trivium answered, but not with a status",
+          "serviceErrorDescription": "The harness service is running and refused this read. Its own code is below."
+        },
+        "TriviumTicketsSection": {
+          "title": "Tickets",
+          "empty": "No tickets. The G3 tier is unused in this repository.",
+          "noCandidates": "No candidate tickets are waiting for approval.",
+          "candidate": "Candidate",
+          "parent": "Parent",
+          "copyApprove": "Copy approve command"
+        },
+        "state": {
+          "noHarness": "No harness",
+          "noAdoptedGoal": "No adopted Goal",
+          "goalDraft": "Goal draft",
+          "escalated": "Escalated",
+          "paused": "Paused",
+          "active": "Active",
+          "review": "Review",
+          "runnable": "Runnable"
+        },
+        "tier": {
+          "g0": "G0 · Purpose",
+          "g1": "G1 · Outcome",
+          "g2": "G2 · Capability",
+          "g3": "G3 · Ticket"
+        },
+        "ticketState": {
+          "open": "Open",
+          "inProgress": "In progress",
+          "blocked": "Blocked",
+          "done": "Done",
+          "abandoned": "Abandoned"
+        }
       }
     },
     "i18n": {

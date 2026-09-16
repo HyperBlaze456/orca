@@ -1,5 +1,5 @@
 import React from 'react'
-import { BookOpen, CalendarClock, EyeOff, Files, Search, Smartphone } from 'lucide-react'
+import { BookOpen, CalendarClock, EyeOff, Files, Search, Smartphone, Target } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '@/store'
 import { cn } from '@/lib/utils'
@@ -36,6 +36,14 @@ export function shouldShowArtifactsButton(
   return settings?.showArtifactsButton === true
 }
 
+export function shouldShowTriviumButton(
+  settings: Partial<Pick<GlobalSettings, 'showTriviumButton'>> | null | undefined
+): boolean {
+  // Why default-on, unlike Artifacts: the page reports the active workspace's own state,
+  // so it is useful without any prior setup.
+  return settings?.showTriviumButton !== false
+}
+
 export function shouldShowSkillsButton(
   settings: Partial<Pick<GlobalSettings, 'showSkillsButton'>> | null | undefined
 ): boolean {
@@ -58,6 +66,7 @@ const SidebarNav = React.memo(function SidebarNav() {
   const openAutomationsPage = useAppStore((s) => s.openAutomationsPage)
   const openMobilePage = useAppStore((s) => s.openMobilePage)
   const openArtifactsPage = useAppStore((s) => s.openArtifactsPage)
+  const openTriviumPage = useAppStore((s) => s.openTriviumPage)
   const openSkillsPage = useAppStore((s) => s.openSkillsPage)
   const openModal = useAppStore((s) => s.openModal)
   const updateSettings = useAppStore((s) => s.updateSettings)
@@ -70,6 +79,11 @@ const SidebarNav = React.memo(function SidebarNav() {
   const automationsActive = activeView === 'automations'
   const mobileActive = activeView === 'mobile'
   const artifactsActive = activeView === 'artifacts'
+  const triviumActive = activeView === 'trivium'
+  const showTriviumButton = useAppStore((s) => shouldShowTriviumButton(s.settings))
+  const hideTriviumButton = React.useCallback(() => {
+    void updateSettings({ showTriviumButton: false })
+  }, [updateSettings])
   const skillsActive = activeView === 'skills'
   const mobileOnboardingBadge = useMobileSidebarOnboardingBadge(showMobileButton)
   const hideAutomationsButton = React.useCallback(() => {
@@ -148,6 +162,35 @@ const SidebarNav = React.memo(function SidebarNav() {
             </button>
           </ContextMenuTrigger>
           <HideSidebarMenu onHide={hideArtifactsButton} />
+        </ContextMenu>
+      ) : null}
+      {showTriviumButton ? (
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <button
+              type="button"
+              onClick={openTriviumPage}
+              aria-current={triviumActive ? 'page' : undefined}
+              className={cn(
+                'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-medium tracking-tight transition-colors',
+                triviumActive
+                  ? 'bg-worktree-sidebar-accent text-worktree-sidebar-accent-foreground'
+                  : 'text-worktree-sidebar-foreground/60 hover:bg-worktree-sidebar-foreground/8'
+              )}
+            >
+              <Target
+                className={cn(
+                  'size-4 shrink-0',
+                  !triviumActive && 'text-worktree-sidebar-foreground/30'
+                )}
+                strokeWidth={triviumActive ? 2.25 : 1.75}
+              />
+              <span className="flex-1">
+                {translate('auto.components.sidebar.SidebarNav.trivium', 'Trivium')}
+              </span>
+            </button>
+          </ContextMenuTrigger>
+          <HideSidebarMenu onHide={hideTriviumButton} />
         </ContextMenu>
       ) : null}
       {showSkillsButton ? (

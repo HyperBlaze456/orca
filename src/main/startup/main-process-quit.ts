@@ -14,6 +14,7 @@ import { clearRuntimeMetadataIfOwned } from '../runtime/runtime-metadata'
 import { shutdownPairedRuntimeBrowserClientHosts } from '../browser/paired-runtime-browser-client-host-runtime'
 import { browserManager } from '../browser/browser-manager'
 import { stopCodexStateDbBackfillRecoveries } from '../codex/codex-state-db-backfill-recovery'
+import { disposeTriviumServices } from '../trivium/trivium-service-supervisor'
 import { awaitPackedRefsLockRelease } from '../git/local-repo-ref-maintenance'
 import { settleTeardownWithinDeadline, settleWithinMs } from '../quit-teardown-deadline'
 import { quitTeardownStartGate } from '../quit-teardown-start-gate'
@@ -132,6 +133,8 @@ function installWillQuitHandler(): void {
     const pluginHostShutdown = state.pluginService?.dispose() ?? Promise.resolve()
     const codexBackfillRecoveryShutdown = stopCodexStateDbBackfillRecoveries()
     const structuredAgentSessionShutdown = stopStructuredAgentSessionRuntime()
+    // Why here: the Trivium service is a main-process child and must not outlive the app.
+    const triviumServiceShutdown = disposeTriviumServices()
     state.pluginService = null
     setUnreadDockBadgeCount(0)
     // Why wait rather than kill: the child finishes fine orphaned, and signalling
@@ -243,6 +246,7 @@ function installWillQuitHandler(): void {
       { name: 'ref-maintenance', promise: refMaintenanceShutdown },
       { name: 'codex-backfill-recovery', promise: codexBackfillRecoveryShutdown },
       { name: 'structured-agent-session', promise: structuredAgentSessionShutdown },
+      { name: 'trivium-service', promise: triviumServiceShutdown },
       { name: 'usage-cache', promise: usageCacheFlush },
       { name: 'stats', promise: statsFlush },
       { name: 'state', promise: storeFlush }

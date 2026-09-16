@@ -310,6 +310,32 @@ export function AppearanceWindowSidebarSection({
                   </SearchableSetting>
 
                   <SearchableSetting
+                    title={translate(
+                      'auto.components.settings.AppearancePane.showTriviumButton',
+                      'Show Trivium Button'
+                    )}
+                    description={sidebarEntries[3]?.description}
+                    keywords={sidebarEntries[3]?.keywords ?? ['trivium', 'harness', 'sidebar']}
+                  >
+                    <SettingsSwitchRow
+                      label={translate(
+                        'auto.components.settings.AppearancePane.showTriviumButton',
+                        'Show Trivium Button'
+                      )}
+                      description={translate(
+                        'auto.components.settings.AppearancePane.showTriviumButtonDescription',
+                        'Show the Trivium harness shortcut in the sidebar.'
+                      )}
+                      checked={settings.showTriviumButton !== false}
+                      onChange={() =>
+                        updateSettings({
+                          showTriviumButton: !(settings.showTriviumButton !== false)
+                        })
+                      }
+                    />
+                  </SearchableSetting>
+
+                  <SearchableSetting
                     title={getShowPinnedWorktreesInGroupsEntry().title}
                     description={getShowPinnedWorktreesInGroupsEntry().description}
                     keywords={getShowPinnedWorktreesInGroupsEntry().keywords}

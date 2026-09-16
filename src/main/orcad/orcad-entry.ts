@@ -23,6 +23,7 @@ import {
   OrcadBindAddressError,
   resolveOrcadBindHost
 } from './orcad-bind-address'
+import { disposeTriviumServices } from '../trivium/trivium-service-supervisor'
 import {
   acquireOrcadInstanceLock,
   OrcadInstanceLockError,
@@ -265,6 +266,9 @@ async function startOrcadRuntime(
       try {
         await rpc.stop()
       } finally {
+        // Why after rpc.stop(): the transport is down, so no request can reopen
+        // the service between the dispose and process exit.
+        await disposeTriviumServices()
         // Why disconnect and not shut down: the daemon must outlive this process, or an
         // orcad restart goes back to killing every running terminal. See
         // orcad-daemon-supervision.ts.

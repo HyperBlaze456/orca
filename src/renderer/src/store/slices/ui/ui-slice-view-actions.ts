@@ -92,6 +92,19 @@ export function createUiViewActions(set: UISliceSet, get: UISliceGet): Partial<U
         activeView: state.previousViewBeforeArtifacts,
         worktreeNavHistoryIndex: rewindHistoryIndexPastView(state, 'artifacts')
       })),
+    openTriviumPage: () => {
+      get().recordViewVisit('trivium')
+      set((state) => ({
+        activeView: 'trivium',
+        previousViewBeforeTrivium:
+          state.activeView === 'trivium' ? state.previousViewBeforeTrivium : state.activeView
+      }))
+    },
+    closeTriviumPage: () =>
+      set((state) => ({
+        activeView: state.previousViewBeforeTrivium,
+        worktreeNavHistoryIndex: rewindHistoryIndexPastView(state, 'trivium')
+      })),
     openMobilePage: () =>
       set((state) => ({
         activeView: 'mobile',
