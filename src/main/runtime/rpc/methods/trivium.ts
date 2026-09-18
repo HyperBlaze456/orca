@@ -1,22 +1,10 @@
-import { defineMethod, type RpcMethod } from '../core'
-import { OptionalBoolean, OptionalString } from '../schemas'
-import { WorktreeSelector } from './files-target-schemas'
+import { defineMethod } from '../core'
+import { WorktreeSelector } from '../../../../shared/rpc-contract/files-target-params'
+import { TriviumProgress, TriviumTickets } from '../../../../shared/rpc-contract/trivium-params'
 import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '../../../../shared/execution-host'
 import { callTriviumService } from '../../../trivium/trivium-service-supervisor'
 import { isTriviumServiceError } from '../../../trivium/trivium-service-protocol'
 import type { OrcaRuntimeService } from '../../orca-runtime'
-
-const TriviumProgress = WorktreeSelector.extend({
-  campaign: OptionalString,
-  verbose: OptionalBoolean
-})
-
-const TriviumTickets = WorktreeSelector.extend({
-  query: OptionalString,
-  under: OptionalString,
-  state: OptionalString,
-  status: OptionalString
-})
 
 type TriviumWorkspaceResult =
   | { supported: false; host: ExecutionHostId; reason: 'remote-execution-host' }
@@ -70,7 +58,7 @@ async function readTriviumWorkspace(
   }
 }
 
-export const TRIVIUM_METHODS: RpcMethod[] = [
+export const TRIVIUM_METHODS = [
   defineMethod({
     name: 'trivium.availability',
     params: null,
