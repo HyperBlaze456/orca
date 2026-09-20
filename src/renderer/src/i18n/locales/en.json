@@ -18127,5 +18127,42 @@
   },
   "common": {
     "retry": "Retry"
+  },
+  "trivium": {
+    "graph": {
+      "keyboardSelect": "Press Enter or Space to select a node.",
+      "keyboardMove": "Press Enter or Space to select a node, then use arrow keys to move it.",
+      "show": "Show",
+      "notRejected": "Except rejected",
+      "all": "All goals",
+      "adopted": "Adopted",
+      "anticipated": "Anticipated",
+      "candidate": "Candidate",
+      "rejected": "Rejected",
+      "textSize": "Text size",
+      "standard": "Standard",
+      "large": "Large",
+      "visibleCount": "{{visible}} / {{total}} goals",
+      "actualSize": "Reset zoom to 100%",
+      "noMatches": "No goals match this filter.",
+      "readingOrder": "Top to bottom: Purpose → Outcome → Capability → Ticket",
+      "edgeLegend": "Solid: contributes to · Dashed: depends on"
+    },
+    "inspect": {
+      "searchPlaceholder": "Search titles, descriptions or IDs…",
+      "chooseGoal": "Select a goal in the graph or goal list to read its full description and explore its connections.",
+      "parents": "Contributes to",
+      "children": "Contributing goals",
+      "dependencies": "Depends on",
+      "dependents": "Required by",
+      "goalDetails": "Goal details",
+      "noStatement": "No description was recorded for this goal.",
+      "missingGoal": "Details are not included in this snapshot.",
+      "relatedWork": "Related work",
+      "goalTickets": "Browse tickets under this goal",
+      "campaignProgress": "Read campaign progress",
+      "searchGoals": "Search goals",
+      "listScope": "All statuses are included. Select a goal to read more."
+    }
   }
 }
