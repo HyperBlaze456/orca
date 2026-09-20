@@ -20,14 +20,17 @@ export function TriviumEscalationsSection({
       <div>
         {escalations.map((escalation) => (
           <TriviumRow key={`${escalation.feature_id}/${escalation.intent_id}`}>
-            <div className="flex min-w-0 flex-wrap items-center gap-x-3 font-mono text-xs text-foreground">
-              <span className="truncate">{escalation.feature_id}</span>
-              <span className="truncate text-muted-foreground">{escalation.intent_id}</span>
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 font-mono text-sm whitespace-pre-wrap break-words text-foreground">
+              <span className="break-all">{escalation.feature_id}</span>
+              <span className="break-all text-muted-foreground">{escalation.intent_id}</span>
             </div>
             {escalation.reasons.length > 0 ? (
               <ul className="list-disc space-y-0.5 pl-4">
                 {escalation.reasons.map((reason) => (
-                  <li key={reason} className="text-xs text-muted-foreground">
+                  <li
+                    key={reason}
+                    className="text-sm whitespace-pre-wrap break-words text-muted-foreground"
+                  >
                     {reason}
                   </li>
                 ))}

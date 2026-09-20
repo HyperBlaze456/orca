@@ -20,7 +20,7 @@ export function TriviumMilestoneSection({
     >
       {milestone ? (
         <div className="space-y-3">
-          <p className="text-xs text-foreground">
+          <p className="text-sm whitespace-pre-wrap break-words text-foreground">
             {milestone.summary ||
               translate(
                 'auto.components.trivium.TriviumMilestoneSection.noSummary',

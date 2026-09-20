@@ -29,7 +29,7 @@ export function TriviumCampaignsSection({
         {campaigns.open.map((campaign) => (
           <TriviumRow key={campaign.campaign_id} className="gap-2">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="min-w-0 flex-1 truncate font-mono text-xs text-foreground">
+              <span className="min-w-0 flex-1 break-all font-mono text-sm text-foreground">
                 {campaign.campaign_id}
               </span>
               <Badge variant={campaign.phase === 'paused' ? 'outline' : 'secondary'}>

@@ -22,7 +22,7 @@ export function TriviumInterviewsSection({
         {interviews.map((interview) => (
           <TriviumRow key={interview.id}>
             <div className="flex min-w-0 items-center gap-2">
-              <span className="min-w-0 flex-1 truncate font-mono text-xs text-foreground">
+              <span className="min-w-0 flex-1 break-all font-mono text-sm whitespace-pre-wrap break-words text-foreground">
                 {interview.id}
               </span>
               <Badge variant="outline" className="shrink-0">

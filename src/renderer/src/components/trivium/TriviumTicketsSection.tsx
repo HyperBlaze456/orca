@@ -45,7 +45,7 @@ export function TriviumTicketsSection({ tickets }: { tickets: TriviumTickets }):
           {tickets.candidates.map((candidate) => (
             <TriviumRow key={candidate.id}>
               <div className="flex min-w-0 items-center gap-2">
-                <span className="min-w-0 flex-1 truncate text-[13px] text-foreground">
+                <span className="min-w-0 flex-1 break-words text-sm text-foreground">
                   {candidate.title}
                 </span>
                 <Badge variant="outline" className="shrink-0">
@@ -55,15 +55,15 @@ export function TriviumTicketsSection({ tickets }: { tickets: TriviumTickets }):
                   )}
                 </Badge>
               </div>
-              <div className="flex min-w-0 flex-wrap items-center gap-x-3 font-mono text-[11px] text-muted-foreground">
-                <span className="truncate">{candidate.id}</span>
-                <span className="truncate">
+              <div className="flex min-w-0 flex-wrap items-center gap-x-3 font-mono text-xs text-muted-foreground">
+                <span className="break-all">{candidate.id}</span>
+                <span className="break-all">
                   {translate('auto.components.trivium.TriviumTicketsSection.parent', 'Parent')}{' '}
                   {candidate.parent}
                 </span>
               </div>
               <div className="flex min-w-0 items-center gap-2 rounded-md border border-border bg-muted/30 px-2 py-1">
-                <code className="min-w-0 flex-1 truncate font-mono text-[11px] text-foreground">
+                <code className="min-w-0 flex-1 whitespace-pre-wrap break-all font-mono text-xs text-foreground">
                   {candidate.approve_command}
                 </code>
                 <NativeChatCopyButton

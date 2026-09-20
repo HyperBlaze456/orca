@@ -18,10 +18,8 @@ export function TriviumSection({
   return (
     <Card className="gap-3 py-4">
       <CardHeader className="flex flex-row items-center justify-between gap-3 px-4">
-        <CardTitle className="text-[11px] font-semibold tracking-[0.05em] text-muted-foreground uppercase">
-          {title}
-        </CardTitle>
-        {meta ? <div className="text-xs text-muted-foreground">{meta}</div> : null}
+        <CardTitle>{title}</CardTitle>
+        {meta ? <div className="text-sm break-words text-muted-foreground">{meta}</div> : null}
       </CardHeader>
       <CardContent className="px-4">
         {isEmpty ? <p className="text-xs text-muted-foreground">{emptyLabel}</p> : children}
@@ -43,7 +41,7 @@ export function TriviumFact({
   return (
     <div className={cn('min-w-0', className)}>
       <div className="text-[11px] tracking-[0.05em] text-muted-foreground uppercase">{label}</div>
-      <div className="truncate text-xs text-foreground">{children}</div>
+      <div className="text-sm whitespace-pre-wrap break-words text-foreground">{children}</div>
     </div>
   )
 }
