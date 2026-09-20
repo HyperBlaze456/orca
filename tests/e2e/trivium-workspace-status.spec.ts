@@ -144,6 +144,7 @@ test.describe('with TRIVIUM_EXECUTABLE pointing at the installed CLI', () => {
     const stateBadge = orcaPage.locator(`[data-trivium-state="${expected.state}"]`)
     await expect(stateBadge).toBeVisible({ timeout: 60_000 })
     await expect(orcaPage.getByText(expected.g0Title, { exact: true })).toBeVisible()
+    await orcaPage.getByRole('tab', { name: 'Workspace details' }).click()
     await expect(orcaPage.getByText(expected.approveCommand, { exact: true })).toBeVisible()
     await expect(orcaPage.getByText(expected.milestoneCampaignId, { exact: true })).toBeVisible()
     await orcaPage.screenshot({ path: path.join(SCREENSHOT_DIR, 'trivium-review.png') })

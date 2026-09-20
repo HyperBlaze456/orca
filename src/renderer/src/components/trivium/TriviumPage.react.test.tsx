@@ -3,15 +3,13 @@
 import { act, createElement } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type {
-  TriviumStatusRpcResult,
-  TriviumWorkspaceStatus
-} from '../../../../shared/trivium-workspace-status'
+import type { TriviumStatusRpcResult } from '../../../../shared/trivium-workspace-status'
 import type { Worktree } from '../../../../shared/worktree/types'
 import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import TriviumPage from './TriviumPage'
+import { makeTriviumStatus as makeStatus } from './trivium-workspace-status.fixture'
 
 const callRuntimeRpcMock = vi.hoisted(() => vi.fn())
 const watchWorktreeMock = vi.hoisted(() => vi.fn(async () => {}))
@@ -64,74 +62,6 @@ function makeRepo(): AppState['repos'][number] {
   }
 }
 
-function makeStatus(): TriviumWorkspaceStatus {
-  return {
-    schema_version: 1,
-    kind: 'workspace-status',
-    requested_path: '/srv/acme',
-    harness_root: '/srv/acme',
-    repository_root: '/srv/acme',
-    is_worker_worktree: false,
-    state: 'review',
-    state_reason: 'A milestone is waiting on your review.',
-    publication: { event_id: 'event.0123456789abcdef', model_revision: 'sha256:fedcba9876543210' },
-    goals: {
-      counts: { g0: 1, g1: 1, g2: 0, g3: 1 },
-      normative: 2,
-      adopted_normative: 2,
-      candidates_to_approve: 1,
-      nodes: [
-        {
-          id: 'goal.purpose',
-          tier: 'g0',
-          title: 'Ship uploads that survive flaky networks',
-          statement: 'Uploads finish or report why.',
-          status: 'adopted'
-        },
-        {
-          id: 'goal.outcome',
-          tier: 'g1',
-          title: 'Resume interrupted uploads',
-          statement: 'A dropped connection resumes from the last chunk.',
-          status: 'adopted'
-        }
-      ],
-      edges: [
-        {
-          id: 'goal-edge.1',
-          source: 'goal.outcome',
-          target: 'goal.purpose',
-          relation: 'contributes-to'
-        }
-      ]
-    },
-    theory_nodes: 28,
-    interviews: [],
-    campaigns: { open: [], closed: 4 },
-    milestone: {
-      campaign_id: 'campaign.uploads',
-      summary: 'Three Features landed; retry policy is still unverified.',
-      unknowns: 3,
-      contradictions: 2,
-      promotion_candidates: 1
-    },
-    escalations: [],
-    tickets: {
-      by_state: { open: 1, 'in-progress': 0, blocked: 0, done: 3, abandoned: 0 },
-      candidates: [
-        {
-          id: 'ticket.upload-retry',
-          title: 'Retry the last chunk once',
-          parent: 'goal.outcome',
-          approve_command: APPROVE_COMMAND
-        }
-      ]
-    },
-    history: { campaigns: 4, features: 9, publications: 12 },
-    warnings: []
-  }
-}
-
 async function renderPage(): Promise<HTMLDivElement> {
   const container = document.createElement('div')
   document.body.append(container)
@@ -173,7 +103,7 @@ afterEach(() => {
 })
 
 describe('TriviumPage', () => {
-  it('renders the review state, the goal outline and the approve command', async () => {
+  it('renders the goal graph and exposes the approve command in workspace details', async () => {
     const result: TriviumStatusRpcResult = { supported: true, host: 'local', ...makeStatus() }
     callRuntimeRpcMock.mockResolvedValue(result)
 
@@ -190,7 +120,14 @@ describe('TriviumPage', () => {
     expect(text).toContain('A milestone is waiting on your review.')
     expect(text).toContain('Ship uploads that survive flaky networks')
     expect(text).toContain('Resume interrupted uploads')
-    expect(text).toContain(APPROVE_COMMAND)
+    expect(container.querySelectorAll('.react-flow__node')).toHaveLength(2)
+    const details = Array.from(container.querySelectorAll('[role=tab]')).find(
+      (tab) => tab.textContent === 'Workspace details'
+    )
+    await act(async () => {
+      details?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }))
+    })
+    expect(container.textContent).toContain(APPROVE_COMMAND)
     // The publication ids are shortened to 12 characters; the full value lives in a tooltip.
     expect(text).toContain('event.012345…')
   })

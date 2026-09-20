@@ -9,7 +9,13 @@ import { TriviumRow, TriviumSection } from './TriviumSection'
 import { triviumTicketStateLabel } from './trivium-status-display'
 
 /** G3 tickets: counts per state, plus the candidates still owed an approve decision. */
-export function TriviumTicketsSection({ tickets }: { tickets: TriviumTickets }): React.JSX.Element {
+export function TriviumTicketsSection({
+  tickets,
+  onSelectGoal
+}: {
+  tickets: TriviumTickets
+  onSelectGoal?: (id: string) => void
+}): React.JSX.Element {
   const total = TRIVIUM_TICKET_STATES.reduce(
     (sum, state) => sum + (tickets.by_state[state] ?? 0),
     0
@@ -59,7 +65,17 @@ export function TriviumTicketsSection({ tickets }: { tickets: TriviumTickets }):
                 <span className="break-all">{candidate.id}</span>
                 <span className="break-all">
                   {translate('auto.components.trivium.TriviumTicketsSection.parent', 'Parent')}{' '}
-                  {candidate.parent}
+                  {onSelectGoal ? (
+                    <button
+                      type="button"
+                      onClick={() => onSelectGoal(candidate.parent)}
+                      className="text-left text-sm break-all underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+                    >
+                      {candidate.parent}
+                    </button>
+                  ) : (
+                    candidate.parent
+                  )}
                 </span>
               </div>
               <div className="flex min-w-0 items-center gap-2 rounded-md border border-border bg-muted/30 px-2 py-1">

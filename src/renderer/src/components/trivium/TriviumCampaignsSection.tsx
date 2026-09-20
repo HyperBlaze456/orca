@@ -1,4 +1,5 @@
 import type { TriviumCampaign } from '../../../../shared/trivium-workspace-status'
+import { Button } from '../ui/button'
 import { Badge } from '../ui/badge'
 import { translate } from '@/i18n/i18n'
 import { TriviumFact, TriviumRow, TriviumSection } from './TriviumSection'
@@ -7,9 +8,13 @@ const NOT_SET = '—'
 
 /** Open Campaigns and the three facts a session needs before stepping one. */
 export function TriviumCampaignsSection({
-  campaigns
+  campaigns,
+  onSelectGoal,
+  onProgress
 }: {
   campaigns: { open: TriviumCampaign[]; closed: number }
+  onSelectGoal?: (id: string) => void
+  onProgress?: (id: string) => void
 }): React.JSX.Element {
   return (
     <TriviumSection
@@ -43,7 +48,17 @@ export function TriviumCampaignsSection({
               <TriviumFact
                 label={translate('auto.components.trivium.TriviumCampaignsSection.goal', 'Goal')}
               >
-                <span className="font-mono">{campaign.goal_id}</span>
+                {onSelectGoal ? (
+                  <button
+                    type="button"
+                    onClick={() => onSelectGoal(campaign.goal_id)}
+                    className="text-left text-sm break-all underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+                  >
+                    {campaign.goal_id}
+                  </button>
+                ) : (
+                  <span className="font-mono">{campaign.goal_id}</span>
+                )}
               </TriviumFact>
               <TriviumFact
                 label={translate(
@@ -70,6 +85,17 @@ export function TriviumCampaignsSection({
                 {campaign.generation}
               </TriviumFact>
             </div>
+            {onProgress ? (
+              <div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onProgress(campaign.campaign_id)}
+                >
+                  {translate('trivium.inspect.campaignProgress', 'Read campaign progress')}
+                </Button>
+              </div>
+            ) : null}
           </TriviumRow>
         ))}
       </div>

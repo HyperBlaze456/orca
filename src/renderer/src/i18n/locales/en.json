@@ -17045,12 +17045,7 @@
           "empty": "Nothing is waiting on a decision from you."
         },
         "TriviumGoalsSection": {
-          "shared": "Shared",
-          "title": "Goals",
-          "counts": "{{adopted}}/{{normative}} adopted · G0 {{g0}} · G1 {{g1}} · G2 {{g2}} · G3 {{g3}}",
-          "empty": "No Goals yet. Run a Goal interview to adopt one.",
-          "dependsOn": "Depends on",
-          "candidatesToApprove": "{{count}} to approve"
+          "empty": "No Goals yet. Run a Goal interview to adopt one."
         },
         "TriviumHeader": {
           "back": "Back",
@@ -18132,6 +18127,9 @@
     "graph": {
       "keyboardSelect": "Press Enter or Space to select a node.",
       "keyboardMove": "Press Enter or Space to select a node, then use arrow keys to move it.",
+      "title": "Goal graph",
+      "details": "Workspace details",
+      "count": "{{count}} goals",
       "show": "Show",
       "notRejected": "Except rejected",
       "all": "All goals",
@@ -18184,6 +18182,10 @@
       "listScope": "All statuses are included. Select a goal to read more.",
       "unsupported": "This host cannot provide these details.",
       "invalid": "The host returned an unreadable response.",
+      "goalList": "Goal list",
+      "browseTickets": "Browse all ticket records",
+      "browseProgress": "Read full progress",
+      "back": "Previous goal",
       "fields": {
         "goals": "Goals",
         "campaigns": "Campaigns",
