@@ -18149,7 +18149,16 @@
       "edgeLegend": "Solid: contributes to · Dashed: depends on"
     },
     "inspect": {
+      "item": "Item {{number}}",
+      "noRecords": "No records.",
+      "tickets": "Ticket details",
+      "progress": "Progress details",
+      "readOnly": "Read-only details. Expand a record to explore its contents.",
+      "refresh": "Refresh details",
+      "clearScope": "Show entire workspace",
+      "searchTickets": "Search ticket details",
       "searchPlaceholder": "Search titles, descriptions or IDs…",
+      "loading": "Loading details…",
       "chooseGoal": "Select a goal in the graph or goal list to read its full description and explore its connections.",
       "parents": "Contributes to",
       "children": "Contributing goals",
@@ -18162,7 +18171,36 @@
       "goalTickets": "Browse tickets under this goal",
       "campaignProgress": "Read campaign progress",
       "searchGoals": "Search goals",
-      "listScope": "All statuses are included. Select a goal to read more."
+      "listScope": "All statuses are included. Select a goal to read more.",
+      "unsupported": "This host cannot provide these details.",
+      "invalid": "The host returned an unreadable response.",
+      "fields": {
+        "goals": "Goals",
+        "campaigns": "Campaigns",
+        "features": "Features",
+        "conflicts": "Conflicts",
+        "memory_delta": "Memory delta",
+        "theory_authority": "Theory authority",
+        "micro": "Micro",
+        "title": "Title",
+        "statement": "Statement",
+        "summary": "Summary",
+        "state": "State",
+        "status": "Status",
+        "phase": "Phase",
+        "id": "Id",
+        "goal_id": "Goal id",
+        "campaign_id": "Campaign id",
+        "feature_id": "Feature id",
+        "evidence": "Evidence",
+        "current": "Current",
+        "representative": "Representative",
+        "added": "Added",
+        "suspect": "Suspect",
+        "superseded": "Superseded",
+        "revalidated": "Revalidated",
+        "invalid": "Invalid"
+      }
     }
   }
 }
