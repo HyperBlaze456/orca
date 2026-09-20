@@ -3,13 +3,11 @@ import type {
   TriviumStatusRpcResult,
   TriviumWorkspaceStatus
 } from '../../../../shared/trivium-workspace-status'
-import { TRIVIUM_WORKSPACE_RUNTIME_CAPABILITY } from '../../../../shared/protocol-version'
 import { selectEditorExternalWatchTargets } from '@/hooks/editor-external-watch-targets'
 import {
   getExecutionHostIdForWorktree,
   getRuntimeEnvironmentIdForWorktree
 } from '@/lib/worktree-runtime-owner'
-import { callRuntimeRpc, runtimeEnvironmentSupportsCapability } from '@/runtime/runtime-rpc-client'
 import {
   getActiveRuntimeTarget,
   runtimeTargetForExecutionHostId,
@@ -17,7 +15,7 @@ import {
   type RuntimeClientTarget
 } from '@/runtime/runtime-client-target'
 import { subscribeRuntimeFileChanges } from '@/runtime/runtime-file-watch-client'
-import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+import { readTriviumWorkspaceProjection } from './trivium-workspace-query'
 import { useAppStore } from '@/store'
 
 export type TriviumStatusPhase =
@@ -41,7 +39,6 @@ export type TriviumWorkspaceStatusResult = {
 
 // Why: a Campaign step rewrites several journals in a burst; one refetch per burst.
 const TRIVIUM_REFETCH_DEBOUNCE_MS = 300
-const TRIVIUM_STATUS_TIMEOUT_MS = 20_000
 
 const LOADING_RESULT = {
   phase: 'loading',
@@ -162,20 +159,10 @@ async function readTriviumStatus(
   target: RuntimeClientTarget,
   workspaceId: string
 ): Promise<TriviumStatusRpcResult> {
-  if (target.kind === 'environment') {
-    const supported = await runtimeEnvironmentSupportsCapability(
-      target.environmentId,
-      TRIVIUM_WORKSPACE_RUNTIME_CAPABILITY
-    )
-    if (!supported) {
-      return { supported: false, host: '', reason: 'remote-execution-host' }
-    }
-  }
-  return callRuntimeRpc<TriviumStatusRpcResult>(
+  return readTriviumWorkspaceProjection<TriviumStatusRpcResult>(
     target,
-    'trivium.status',
-    { worktree: toRuntimeWorktreeSelector(workspaceId) },
-    { timeoutMs: TRIVIUM_STATUS_TIMEOUT_MS }
+    workspaceId,
+    'trivium.status'
   )
 }
 
