@@ -18148,6 +18148,16 @@
       "readingOrder": "Top to bottom: Purpose → Outcome → Capability → Ticket",
       "edgeLegend": "Solid: contributes to · Dashed: depends on"
     },
+    "session": {
+      "title": "Session",
+      "choose": "Choose an agent session",
+      "continuity": "Node requests continue in this session.",
+      "unavailable": "This session is unavailable. Reconnect or choose another session.",
+      "empty": "Start an agent in this workspace to continue here.",
+      "openWorkspace": "Open workspace",
+      "request": "What should change?",
+      "send": "Send to session"
+    },
     "inspect": {
       "item": "Item {{number}}",
       "noRecords": "No records.",
