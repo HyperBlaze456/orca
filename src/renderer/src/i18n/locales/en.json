@@ -18284,6 +18284,251 @@
       "explain": "Arrows point from a ticket to what it depends on.",
       "none": "No dependencies between the rows shown.",
       "hint": "Select or hover a ticket to see its dependencies."
+    },
+    "composer": {
+      "chip": {
+        "explainTicket": "Explain this ticket",
+        "dependencies": "What does it depend on?",
+        "plan": "Draft a plan",
+        "explainGoal": "Explain this goal",
+        "split": "Split into sub-goals",
+        "conflicts": "Find conflicts"
+      },
+      "approveWithCommand": "I approve the proposed ticket “{{title}}” ({{id}}). Adopt it by running this command with my name as the approver: {{command}}",
+      "approve": "I approve the proposed ticket “{{title}}” ({{id}}). Adopt it with trivium's ticket approve command, with my name as the approver.",
+      "sent": "Sent to {{agent}}",
+      "noAgent": "Start an agent session in this workspace to send requests from here.",
+      "ticket": "Ticket",
+      "goal": "{{tier}} goal",
+      "input": "Message to the agent",
+      "placeholderTicket": "Ask the agent about this ticket…",
+      "placeholderGoal": "Ask the agent about this goal…",
+      "target": "Agent session",
+      "noTarget": "No agent session",
+      "send": "Send"
+    },
+    "overview": {
+      "headline": {
+        "review": "A milestone is ready for your review",
+        "runnable": "Ready for the next Campaign step",
+        "active": "A Campaign is running",
+        "paused": "A Campaign is paused until you decide",
+        "escalated": "Work is waiting on your decision",
+        "goalDraft": "A Goal draft is ready for review",
+        "noAdoptedGoal": "No Goal has been adopted yet",
+        "noHarness": "This workspace has no Trivium harness"
+      },
+      "eyebrow": "Overview",
+      "goals": "Goals",
+      "workNote": "Work counts tickets done. Outcome needs assessed success criteria.",
+      "needsYou": "Needs you"
+    },
+    "reader": {
+      "workDone": "{{done}}/{{total}} tickets done",
+      "noTickets": "No tickets yet",
+      "outcome": {
+        "unassessed": "Not assessed",
+        "achieved": "Achieved",
+        "notAchieved": "Not achieved"
+      },
+      "count": {
+        "contradictionOne": "1 contradiction",
+        "contradictionMany": "{{n}} contradictions",
+        "openQuestionOne": "1 open question",
+        "openQuestionMany": "{{n}} open questions",
+        "promotionOne": "1 promotion candidate",
+        "promotionMany": "{{n}} promotion candidates",
+        "milestoneOne": "1 milestone",
+        "milestoneMany": "{{n}} milestones",
+        "tradeOffOne": "1 trade-off",
+        "tradeOffMany": "{{n}} trade-offs",
+        "drift": "{{n}} drift",
+        "ticketOne": "1 ticket",
+        "ticketMany": "{{n}} tickets"
+      },
+      "showAll": "Show all {{n}}",
+      "technicalDetails": "Technical details",
+      "id": "ID",
+      "copy": "Copy",
+      "status": "Status",
+      "tier": "Tier",
+      "featuresCompleted": "Features completed",
+      "showLess": "Show less",
+      "missing": "This item is no longer in the Goal model",
+      "backToOverview": "Back to Overview",
+      "label": "Reader",
+      "goalPath": "Goal path",
+      "goals": "Goals",
+      "copied": "Copied",
+      "showMore": "Show more",
+      "ticketsFailed": "Couldn't load tickets.",
+      "progressFailed": "Couldn't load progress details.",
+      "ticketsLoading": "Loading tickets…",
+      "progressLoading": "Loading progress details…",
+      "retry": "Retry",
+      "mergedCommit": "Merged {{commit}}"
+    },
+    "goalPage": {
+      "ticketUnderSubGoals": "Its only ticket sits under a sub-goal.",
+      "ticketsUnderSubGoals": "All {{n}} tickets sit under sub-goals.",
+      "ticketsDone": "{{done}}/{{total}} done",
+      "openInList": "Open in list",
+      "noDescription": "No description recorded.",
+      "subGoals": "Sub-goals",
+      "tickets": "Tickets",
+      "outcome": "Outcome",
+      "work": "Work",
+      "contributesTo": "Contributes to {{goal}}",
+      "dependsOn": "Depends on",
+      "requiredBy": "Required by",
+      "latestMilestone": "Latest milestone",
+      "subGoalMilestones": "Milestones in sub-goals"
+    },
+    "feature": {
+      "completed": "Completed",
+      "deduplicated": "Already delivered under another ticket",
+      "inProgress": "In progress",
+      "queued": "Queued",
+      "blocked": "Blocked",
+      "abandoned": "Abandoned",
+      "waitsOn": "Waits on {{ticket}}",
+      "deliveredUnder": "Delivered under {{ticket}}"
+    },
+    "approval": {
+      "title": "Waiting for your approval",
+      "explainUnder": "Approving adopts this proposed ticket under “{{parent}}”. Until then it is not part of the Goal model.",
+      "explain": "Approving adopts this proposed ticket. Until then it is not part of the Goal model.",
+      "why": "Why it was proposed.",
+      "ask": "Ask the agent to approve",
+      "copyCommand": "Copy command"
+    },
+    "criteria": {
+      "met": "Met",
+      "notMet": "Not met",
+      "unknown": "Unknown",
+      "title": "Success criteria",
+      "none": "No success criteria recorded yet."
+    },
+    "goalStatus": {
+      "candidate": "Candidate",
+      "anticipated": "Anticipated"
+    },
+    "memory": {
+      "valid": "{{n}} valid",
+      "suspect": "{{n}} to recheck",
+      "invalid": "{{n}} no longer hold",
+      "superseded": "{{n}} replaced by newer",
+      "acrossOne": "Across 1 Campaign:",
+      "acrossMany": "Across {{n}} Campaigns:",
+      "title": "Memory",
+      "added": "added",
+      "revalidated": "re-checked and kept",
+      "flagged": "flagged for a recheck",
+      "noLongerHold": "no longer hold",
+      "barLabel": "Current memory: {{parts}}",
+      "examples": "Examples of added memory"
+    },
+    "milestone": {
+      "readyForReview": "Ready for your review",
+      "drift": "Drift",
+      "tradeOffs": "Trade-offs",
+      "promotions": "Promotion candidates",
+      "readFull": "Read full milestone"
+    },
+    "questions": {
+      "source": "{{campaign}} milestone",
+      "title": "Open questions",
+      "contradictions": "Contradictions",
+      "unknowns": "Unknowns"
+    },
+    "campaigns": {
+      "title": "Campaigns"
+    },
+    "needsYou": {
+      "openGoal": "Open goal",
+      "paused": "{{campaign}} is paused",
+      "pauseCode": "Reason: {{code}}",
+      "noPauseReason": "No reason recorded",
+      "escalation": "{{feature}} needs your decision",
+      "health": "Theory health is {{health}}",
+      "healthUnknown": "unknown",
+      "executionPolicy": "Execution policy: {{policy}}",
+      "milestone": "Review the {{campaign}} milestone",
+      "read": "Read",
+      "proposedUnder": "Proposed ticket · {{parent}}",
+      "proposed": "Proposed ticket",
+      "review": "Review"
+    },
+    "interviews": {
+      "theory": "Theory interview",
+      "goal": "Goal interview",
+      "title": "Interviews",
+      "none": "No interview has started yet."
+    },
+    "workspace": {
+      "harness": "Harness",
+      "revision": "Model revision",
+      "theory": "Theory",
+      "theoryCounts": "{{nodes}} nodes · {{promoted}} promoted · {{milestone}} from milestones",
+      "history": "History",
+      "historyCounts": "{{campaigns}} Campaigns · {{features}} features · {{publications}} publications",
+      "interviews": "Interviews",
+      "noInterviews": "None",
+      "details": "Workspace details"
+    },
+    "guidance": {
+      "title": "Next step",
+      "goalDraft": "A Goal draft waits for your review. Ask the agent in this workspace to show it, then adopt it or ask for changes. Adopted Goals appear here with their sub-goals and tickets.",
+      "noAdoptedGoal": "Trivium works toward an adopted Goal. Continue the Goal interview from an agent session in this workspace; once you adopt a Goal, it appears here with its sub-goals and tickets."
+    },
+    "display": {
+      "groupStatus": "Status",
+      "groupGoal": "Goal",
+      "groupNone": "None",
+      "orderGoal": "Goal order",
+      "orderTitle": "Title",
+      "propertyId": "ID",
+      "propertyGoal": "Goal",
+      "propertyCommit": "Commit",
+      "button": "Display",
+      "title": "Display options",
+      "grouping": "Grouping",
+      "ordering": "Ordering",
+      "properties": "Properties",
+      "showDone": "Show done tickets"
+    },
+    "ticketList": {
+      "noMatches": "No tickets match.",
+      "noneUnderGoal": "No tickets under this goal yet.",
+      "none": "No tickets yet.",
+      "titleUnderGoal": "Tickets",
+      "title": "All tickets",
+      "search": "Search tickets",
+      "under": "Under {{goal}}",
+      "clearParent": "Show all tickets",
+      "noParent": "No parent goal",
+      "waitingOn": "Waiting on {{n}}"
+    },
+    "ticketPage": {
+      "position": "{{position}} / {{total}}",
+      "previous": "Previous ticket",
+      "next": "Next ticket",
+      "filesTouched": "Files this ticket touches · {{n}}",
+      "dependsOn": "Depends on",
+      "requiredBy": "Required by",
+      "noDescription": "No description recorded.",
+      "deliveredBy": "Delivered by",
+      "none": "None",
+      "adopted": "Adopted",
+      "rail": "Ticket properties",
+      "properties": "Properties",
+      "approval": "Approval",
+      "goal": "Goal",
+      "merged": "Merged",
+      "change": "Change",
+      "details": "Details",
+      "files": "Files",
+      "copyId": "Copy ID"
     }
   }
 }
