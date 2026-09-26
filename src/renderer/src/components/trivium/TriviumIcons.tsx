@@ -61,7 +61,7 @@ function TriviumIconFrame({
   )
 }
 
-function ticketStatusShape(kind: TriviumTicketStatusIconKind): React.JSX.Element {
+function ticketStatusGlyph(kind: TriviumTicketStatusIconKind): React.JSX.Element {
   switch (kind) {
     case 'approval':
       return (
@@ -129,7 +129,7 @@ export function TriviumTicketStatusIcon({
 }: TriviumIconProps & { kind: TriviumTicketStatusIconKind }): React.JSX.Element {
   return (
     <TriviumIconFrame {...props} icon="ticket-status" value={kind}>
-      {ticketStatusShape(kind)}
+      {ticketStatusGlyph(kind)}
     </TriviumIconFrame>
   )
 }
@@ -209,7 +209,7 @@ export function TriviumTicketGroupIcon(props: TriviumIconProps): React.JSX.Eleme
   )
 }
 
-function outcomeShape(outcome: TriviumOutcomeIconKind): React.JSX.Element {
+function outcomeGlyph(outcome: TriviumOutcomeIconKind): React.JSX.Element {
   switch (outcome) {
     case 'unassessed':
       return (
@@ -256,7 +256,7 @@ export function TriviumOutcomeIcon({
 }: TriviumIconProps & { outcome: TriviumOutcomeIconKind }): React.JSX.Element {
   return (
     <TriviumIconFrame {...props} icon="outcome" value={outcome}>
-      {outcomeShape(outcome)}
+      {outcomeGlyph(outcome)}
     </TriviumIconFrame>
   )
 }

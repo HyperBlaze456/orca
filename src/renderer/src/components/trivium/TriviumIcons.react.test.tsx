@@ -26,7 +26,7 @@ function renderIcon(icon: ReactElement): SVGSVGElement {
 }
 
 // Top-level shapes as "tag.class", which is what distinguishes one glyph from another.
-function shapeOf(svg: SVGSVGElement): string[] {
+function partsOf(svg: SVGSVGElement): string[] {
   return [...svg.children].map(
     (child) => `${child.tagName.toLowerCase()}.${child.getAttribute('class') ?? ''}`
   )
@@ -48,29 +48,34 @@ describe('TriviumTicketStatusIcon', () => {
   ]
 
   it('draws each ticket kind with its own shape and state color', () => {
-    const shapes = new Map(
+    const partsByKind = new Map(
       kinds.map((kind) => {
-        const shape = shapeOf(renderIcon(<TriviumTicketStatusIcon kind={kind} />))
+        const parts = partsOf(renderIcon(<TriviumTicketStatusIcon kind={kind} />))
         cleanup()
-        return [kind, shape]
+        return [kind, parts]
       })
     )
-    expect(shapes.get('open')).toEqual(['circle.stroke-muted-foreground'])
-    expect(shapes.get('in-progress')).toEqual([
+    expect(partsByKind.get('open')).toEqual(['circle.stroke-muted-foreground'])
+    expect(partsByKind.get('in-progress')).toEqual([
       'circle.stroke-trivium-progress',
       'path.fill-trivium-progress'
     ])
-    expect(shapes.get('blocked')).toEqual([
+    expect(partsByKind.get('blocked')).toEqual([
       'circle.stroke-trivium-blocked',
       'path.stroke-trivium-blocked',
       'circle.fill-trivium-blocked'
     ])
-    expect(shapes.get('done')).toEqual(['circle.fill-trivium-done', 'path.stroke-trivium-on-color'])
-    expect(shapes.get('abandoned')).toEqual([
+    expect(partsByKind.get('done')).toEqual([
+      'circle.fill-trivium-done',
+      'path.stroke-trivium-on-color'
+    ])
+    expect(partsByKind.get('abandoned')).toEqual([
       'circle.fill-muted-foreground/60',
       'path.stroke-trivium-on-color'
     ])
-    expect(new Set([...shapes.values()].map((shape) => shape.join('|'))).size).toBe(kinds.length)
+    expect(new Set([...partsByKind.values()].map((parts) => parts.join('|'))).size).toBe(
+      kinds.length
+    )
   })
 
   it('marks done with a check and abandoned with an x', () => {
@@ -142,7 +147,7 @@ describe('TriviumProgressRing', () => {
     for (const fraction of [0, -0.5, Number.NaN]) {
       const svg = renderIcon(<TriviumProgressRing fraction={fraction} />)
       expect(arcLength(svg)).toBeNull()
-      expect(shapeOf(svg)).toEqual(['circle.stroke-trivium-line'])
+      expect(partsOf(svg)).toEqual(['circle.stroke-trivium-line'])
       cleanup()
     }
     const full = arcLength(renderIcon(<TriviumProgressRing fraction={1} />))
@@ -174,19 +179,19 @@ describe('TriviumProgressRing', () => {
 
 describe('TriviumMilestoneDiamond', () => {
   it('fills with the decision color only for the milestone under review', () => {
-    expect(shapeOf(renderIcon(<TriviumMilestoneDiamond />))).toEqual([
+    expect(partsOf(renderIcon(<TriviumMilestoneDiamond />))).toEqual([
       'path.stroke-muted-foreground'
     ])
     cleanup()
     const review = renderIcon(<TriviumMilestoneDiamond review />)
-    expect(shapeOf(review)).toEqual(['path.fill-trivium-decision stroke-trivium-decision'])
+    expect(partsOf(review)).toEqual(['path.fill-trivium-decision stroke-trivium-decision'])
     expect(review.dataset.value).toBe('review')
   })
 })
 
 describe('TriviumTicketGroupIcon', () => {
   it('draws two stacked muted bars', () => {
-    expect(shapeOf(renderIcon(<TriviumTicketGroupIcon />))).toEqual([
+    expect(partsOf(renderIcon(<TriviumTicketGroupIcon />))).toEqual([
       'rect.stroke-muted-foreground',
       'rect.stroke-muted-foreground'
     ])
@@ -198,14 +203,14 @@ describe('TriviumOutcomeIcon', () => {
     const outcomes: TriviumOutcomeIconKind[] = ['unassessed', 'achieved', 'not-achieved']
     const svgs = outcomes.map((outcome) => renderIcon(<TriviumOutcomeIcon outcome={outcome} />))
     const [unassessed, achieved, notAchieved] = svgs
-    expect(shapeOf(unassessed)).toEqual(['circle.stroke-muted-foreground'])
+    expect(partsOf(unassessed)).toEqual(['circle.stroke-muted-foreground'])
     expect(unassessed.querySelector('circle')?.getAttribute('stroke-dasharray')).toBe('2.2 2.2')
-    expect(shapeOf(achieved)).toEqual([
+    expect(partsOf(achieved)).toEqual([
       'circle.fill-trivium-success',
       'path.stroke-trivium-on-color'
     ])
     expect(achieved.querySelector('path')?.getAttribute('d')).toBe(CHECK)
-    expect(shapeOf(notAchieved)).toEqual([
+    expect(partsOf(notAchieved)).toEqual([
       'circle.stroke-trivium-blocked',
       'path.stroke-trivium-blocked'
     ])
@@ -284,15 +289,15 @@ describe('Trivium icons: contract edges', () => {
       /^(fill|stroke|text)-(trivium-(decision|progress|blocked|done|new|success|on-color|line|line-strong)|muted-foreground(\/\d+)?)$/
     for (const [name, icon] of everyIcon()) {
       const svg = renderIcon(icon)
-      for (const shape of svg.querySelectorAll('*')) {
-        const colorClasses = (shape.getAttribute('class') ?? '')
+      for (const element of svg.querySelectorAll('*')) {
+        const colorClasses = (element.getAttribute('class') ?? '')
           .split(/\s+/)
           .filter((token) => /^(fill|stroke|text|bg|border)-/.test(token))
         for (const token of colorClasses) {
           expect([name, token]).toEqual([name, expect.stringMatching(tokenClass)])
         }
         for (const attribute of ['fill', 'stroke', 'color']) {
-          const value = shape.getAttribute(attribute)
+          const value = element.getAttribute(attribute)
           if (value !== null) {
             expect([name, attribute, value]).toEqual([
               name,
@@ -325,7 +330,7 @@ describe('Trivium icons: contract edges', () => {
     expect((sliver ?? 0) / RING_LENGTH).toBeLessThan(0.01)
     cleanup()
     const emptyDashed = renderIcon(<TriviumProgressRing fraction={0} dashed />)
-    expect(shapeOf(emptyDashed)).toEqual(['circle.stroke-trivium-line'])
+    expect(partsOf(emptyDashed)).toEqual(['circle.stroke-trivium-line'])
     expect(emptyDashed.querySelector('circle')?.getAttribute('stroke-dasharray')).toBe('2.4 2')
   })
 })
