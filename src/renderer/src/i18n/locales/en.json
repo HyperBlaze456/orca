@@ -18213,6 +18213,11 @@
         "revalidated": "Revalidated",
         "invalid": "Invalid"
       }
+    },
+    "changeDot": {
+      "new": "New since your last visit",
+      "changed": "Changed since your last visit",
+      "changedDetail": "Changed: {{description}}"
     }
   }
 }

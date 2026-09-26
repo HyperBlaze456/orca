@@ -118,6 +118,17 @@
   --color-git-graph-lane-4: var(--git-graph-lane-4);
   --color-git-graph-lane-5: var(--git-graph-lane-5);
   --color-annotation-highlight: var(--annotation-highlight);
+  --color-trivium-decision: var(--trivium-decision);
+  --color-trivium-progress: var(--trivium-progress);
+  --color-trivium-blocked: var(--trivium-blocked);
+  --color-trivium-done: var(--trivium-done);
+  --color-trivium-new: var(--trivium-new);
+  --color-trivium-success: var(--trivium-success);
+  --color-trivium-on-color: var(--trivium-on-color);
+  --color-trivium-line: var(--trivium-line);
+  --color-trivium-line-strong: var(--trivium-line-strong);
+  --color-trivium-row-hover: var(--trivium-row-hover);
+  --color-trivium-row-selected: var(--trivium-row-selected);
   --shadow-floating: 0 10px 24px rgb(0 0 0 / 0.18);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
@@ -250,6 +261,20 @@
      meet >=3:1 against `--card`, not only the hover/drag strong state. */
   --tab-group-split-divider: #868690;
   --tab-group-split-divider-strong: #71717a;
+  /* Trivium states, one meaning per hue; progress/blocked/success alias Orca's roles. */
+  --trivium-decision: #ea580c;
+  --trivium-progress: var(--workspace-status-progress);
+  --trivium-blocked: var(--destructive);
+  --trivium-done: #5e6ad2;
+  --trivium-new: #2563eb;
+  --trivium-success: var(--status-success);
+  --trivium-on-color: #fff;
+  /* Why: tree connectors need more contrast than the --border hairline. */
+  --trivium-line: color-mix(in srgb, var(--foreground) 20%, var(--background));
+  --trivium-line-strong: color-mix(in srgb, var(--foreground) 80%, var(--background));
+  /* Why: flat --accent vanishes on white and outweighs selection in dark (STYLEGUIDE jump-palette note). */
+  --trivium-row-hover: color-mix(in srgb, var(--foreground) 4%, var(--background));
+  --trivium-row-selected: color-mix(in srgb, var(--foreground) 9%, var(--background));
 }
 
 /* ── Dark Mode ───────────────────────────────────────── */
@@ -364,6 +389,14 @@
   /* Brighter than terminal defaults so the always-visible line clears 3:1 on `--card`. */
   --tab-group-split-divider: #71717a;
   --tab-group-split-divider-strong: #a1a1aa;
+  /* Trivium: only values that differ from light; the :root aliases re-resolve here. */
+  --trivium-decision: #f97316;
+  --trivium-done: #7c84e3;
+  --trivium-new: #60a5fa;
+  --trivium-on-color: #0a0a0a;
+  --trivium-line: color-mix(in srgb, var(--foreground) 24%, var(--background));
+  --trivium-row-hover: color-mix(in srgb, var(--foreground) 5%, var(--background));
+  --trivium-row-selected: color-mix(in srgb, var(--foreground) 13%, var(--background));
 }
 
 .plugin-security-chrome {
