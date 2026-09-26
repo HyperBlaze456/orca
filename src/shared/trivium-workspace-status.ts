@@ -16,7 +16,15 @@ export type TriviumWorkspaceState =
   | 'runnable'
 
 export type TriviumGoalTier = 'g0' | 'g1' | 'g2' | 'g3'
-export type TriviumGoalStatus = 'adopted' | 'anticipated' | 'candidate' | 'rejected'
+/** Open: a status a newer trivium adds passes through as a plain string. */
+export type TriviumGoalStatus =
+  | 'adopted'
+  | 'anticipated'
+  | 'candidate'
+  | 'rejected'
+  | 'retired'
+  | 'replaced'
+  | (string & {})
 export type TriviumGoalRelation = 'contributes-to' | 'depends-on'
 
 export type TriviumGoalNode = {
@@ -53,7 +61,16 @@ export type TriviumInterview = {
   created_at: string
 }
 
-export type TriviumCampaignPhase = 'started' | 'active' | 'paused' | 'milestone-reached'
+/** Open: the status projection names four phases, the progress projection all seven. */
+export type TriviumCampaignPhase =
+  | 'started'
+  | 'active'
+  | 'paused'
+  | 'milestone-reached'
+  | 'milestone-recorded'
+  | 'milestone-synthesized'
+  | 'milestone-closed'
+  | (string & {})
 
 export type TriviumCampaign = {
   campaign_id: string

@@ -18218,6 +18218,39 @@
       "new": "New since your last visit",
       "changed": "Changed since your last visit",
       "changedDetail": "Changed: {{description}}"
+    },
+    "change": {
+      "leftParent": "No longer under {{title}}",
+      "movedUnder": "Moved under {{title}}",
+      "alsoUnder": "Also under {{title}}",
+      "tier": "Tier {{from}} → {{to}}",
+      "status": "Status {{from}} → {{to}}",
+      "title": "Title changed",
+      "statement": "Description changed",
+      "new": "New since your last visit"
+    },
+    "tier": {
+      "g0": "Vision",
+      "g1": "Outcome",
+      "g2": "Campaign outcome",
+      "g3": "Ticket"
+    },
+    "phase": {
+      "started": "Started",
+      "active": "Running",
+      "paused": "Paused",
+      "milestoneReached": "Milestone reached",
+      "milestoneRecorded": "Milestone recorded",
+      "milestoneSynthesized": "Milestone written",
+      "milestoneClosed": "Closed"
+    },
+    "ticketKind": {
+      "approval": "Needs approval",
+      "inProgress": "In progress",
+      "blocked": "Blocked",
+      "open": "Open",
+      "done": "Done",
+      "abandoned": "Abandoned"
     }
   }
 }
