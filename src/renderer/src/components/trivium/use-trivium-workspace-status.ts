@@ -35,6 +35,10 @@ export type TriviumWorkspaceStatusResult = {
   /** Second line of an `unavailable` or `service-error` verdict. */
   detail: string | null
   refresh: () => void
+  /** When the data on screen arrived; a failed refresh keeps both. */
+  updatedAt?: number
+  /** Counts answers that carried data, so detail reads can follow every status read. */
+  dataRevision: number
 }
 
 // Why: a Campaign step rewrites several journals in a burst; one refetch per burst.
@@ -48,7 +52,9 @@ const LOADING_RESULT = {
   detail: null
 } as const
 
-type TriviumStatusState = Omit<TriviumWorkspaceStatusResult, 'refresh'>
+type TriviumStatusState = Omit<TriviumWorkspaceStatusResult, 'refresh' | 'dataRevision'> & {
+  dataRevision?: number
+}
 /** A verdict plus the workspace/host it describes, so a stale one is recognizable on sight. */
 type IdentifiedStatusState = TriviumStatusState & { identity: string }
 
@@ -220,19 +226,35 @@ export function useTriviumWorkspaceStatus(
         if (requestIdRef.current !== requestId) {
           return
         }
-        setState({ identity: requestIdentity, ...toStatusState(executionHostId, result) })
+        const next = toStatusState(executionHostId, result)
+        setState((previous) => {
+          const same = previous.identity === requestIdentity
+          const revision = same ? (previous.dataRevision ?? 0) : 0
+          return {
+            identity: requestIdentity,
+            ...next,
+            updatedAt: next.data ? Date.now() : same ? previous.updatedAt : undefined,
+            dataRevision: next.data ? revision + 1 : revision
+          }
+        })
       })
       .catch((error: unknown) => {
         if (requestIdRef.current !== requestId) {
           return
         }
-        setState({
-          identity: requestIdentity,
-          phase: 'error',
-          data: null,
-          host: executionHostId,
-          reason: error instanceof Error ? error.message : String(error),
-          detail: null
+        // Why: losing contact keeps the last answer on screen; the page marks it stale.
+        setState((previous) => {
+          const same = previous.identity === requestIdentity
+          return {
+            identity: requestIdentity,
+            phase: 'error',
+            data: same ? previous.data : null,
+            updatedAt: same ? previous.updatedAt : undefined,
+            dataRevision: same ? previous.dataRevision : 0,
+            host: executionHostId,
+            reason: error instanceof Error ? error.message : String(error),
+            detail: null
+          }
         })
       })
   }, [executionHostId, target, workspaceId])
@@ -316,6 +338,8 @@ export function useTriviumWorkspaceStatus(
     host: current.host,
     reason: current.reason,
     detail: current.detail,
-    refresh: load
+    refresh: load,
+    updatedAt: current.updatedAt,
+    dataRevision: current.dataRevision ?? 0
   }
 }

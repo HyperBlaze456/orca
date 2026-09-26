@@ -2,6 +2,7 @@
 
 import { act, createElement } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
+import { renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { FsChangedPayload } from '../../../../shared/filesystem-entry-types'
 import type {
@@ -13,6 +14,7 @@ import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import TriviumPage from './TriviumPage'
+import { useTriviumWorkspaceStatus } from './use-trivium-workspace-status'
 
 const callRuntimeRpcMock = vi.hoisted(() => vi.fn())
 const subscribeRuntimeFileChangesMock = vi.hoisted(() => vi.fn())
@@ -203,7 +205,9 @@ describe('useTriviumWorkspaceStatus', () => {
 
     await renderPage()
     await flush()
-    expect(callRuntimeRpcMock).toHaveBeenCalledTimes(1)
+    expect(
+      callRuntimeRpcMock.mock.calls.filter((call) => call[1] === 'trivium.status')
+    ).toHaveLength(1)
 
     // A Campaign's worker checkout carries a copied `.trivium`; its writes are not the project's.
     await act(async () => {
@@ -219,7 +223,9 @@ describe('useTriviumWorkspaceStatus', () => {
       })
       await vi.advanceTimersByTimeAsync(600)
     })
-    expect(callRuntimeRpcMock).toHaveBeenCalledTimes(1)
+    expect(
+      callRuntimeRpcMock.mock.calls.filter((call) => call[1] === 'trivium.status')
+    ).toHaveLength(1)
 
     await act(async () => {
       emitFsChange?.({
@@ -235,7 +241,9 @@ describe('useTriviumWorkspaceStatus', () => {
       await vi.advanceTimersByTimeAsync(600)
     })
     // One refetch for the burst, not one per event.
-    expect(callRuntimeRpcMock).toHaveBeenCalledTimes(2)
+    expect(
+      callRuntimeRpcMock.mock.calls.filter((call) => call[1] === 'trivium.status')
+    ).toHaveLength(2)
   })
 
   it('refuses a remote host that does not announce the trivium methods', async () => {
@@ -255,5 +263,46 @@ describe('useTriviumWorkspaceStatus', () => {
     expect(text).toContain('Trivium is not available on this host')
     expect(text).toContain('runtime:env-1')
     expect(text).not.toContain('method_not_found')
+  })
+})
+
+describe('status answers over time', () => {
+  it('keeps the last answer through a failed refresh and counts only answers with data', async () => {
+    const answer = { supported: true, host: 'local', ...makeStatus('first') }
+    callRuntimeRpcMock
+      .mockResolvedValueOnce(answer)
+      .mockRejectedValueOnce(new Error('Execution host is unreachable.'))
+      .mockResolvedValueOnce({ supported: true, host: 'local', ...makeStatus('second') })
+    const { result } = renderHook(() => useTriviumWorkspaceStatus('wt-1', '/srv/one', null))
+    await waitFor(() => expect(result.current.phase).toBe('ready'))
+    expect(result.current.dataRevision).toBe(1)
+    const arrived = result.current.updatedAt
+    expect(arrived).toEqual(expect.any(Number))
+
+    act(() => result.current.refresh())
+    await waitFor(() => expect(result.current.phase).toBe('error'))
+    // Loss of contact keeps the data and when it arrived; nothing new was read.
+    expect(result.current.data).toBe(answer)
+    expect(result.current.updatedAt).toBe(arrived)
+    expect(result.current.dataRevision).toBe(1)
+    expect(result.current.reason).toBe('Execution host is unreachable.')
+
+    act(() => result.current.refresh())
+    await waitFor(() => expect(result.current.data?.state_reason).toBe('second'))
+    expect(result.current.phase).toBe('ready')
+    expect(result.current.dataRevision).toBe(2)
+  })
+
+  it('starts another workspace from nothing', async () => {
+    callRuntimeRpcMock.mockResolvedValue({ supported: true, host: 'local', ...makeStatus('any') })
+    const { result, rerender } = renderHook(
+      ({ id, path }) => useTriviumWorkspaceStatus(id, path, null),
+      { initialProps: { id: 'wt-1', path: '/srv/one' } }
+    )
+    await waitFor(() => expect(result.current.dataRevision).toBe(1))
+    rerender({ id: 'wt-2', path: '/srv/two' })
+    expect(result.current).toMatchObject({ phase: 'loading', data: null, dataRevision: 0 })
+    expect(result.current.updatedAt).toBeUndefined()
+    await waitFor(() => expect(result.current.dataRevision).toBe(1))
   })
 })

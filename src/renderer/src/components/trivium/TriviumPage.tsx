@@ -1,69 +1,125 @@
 import { useEffect } from 'react'
 import { useAppStore } from '../../store'
 import { hasVisibleOverlay } from '@/lib/visible-overlay'
+import { useTriviumPageData, type TriviumPageData } from './trivium-page-data'
 import { TriviumHeader } from './TriviumHeader'
-import { TriviumWorkspaceView } from './TriviumWorkspaceView'
+import { TriviumReader } from './TriviumReader'
+import { TriviumSplit } from './TriviumSplit'
 import {
-  TriviumErrorScreen,
   TriviumLoadingScreen,
   TriviumNoHarnessScreen,
+  TriviumNoWorkspaceScreen,
   TriviumServiceErrorScreen,
   TriviumUnavailableScreen,
+  TriviumUnreachableScreen,
   TriviumUnsupportedScreen
 } from './TriviumStateScreens'
-import { useTriviumActiveWorkspace } from './use-trivium-active-workspace'
+import { TriviumStructurePane } from './TriviumStructurePane'
 import {
-  useTriviumWorkspaceStatus,
-  type TriviumWorkspaceStatusResult
-} from './use-trivium-workspace-status'
+  useTriviumActiveWorkspace,
+  type TriviumActiveWorkspace
+} from './use-trivium-active-workspace'
 
 function TriviumPageBody({
-  status,
-  workspaceId,
+  workspace,
+  page,
   sessionKey
 }: {
-  status: TriviumWorkspaceStatusResult
-  workspaceId: string
+  workspace: TriviumActiveWorkspace | null
+  page: TriviumPageData
   sessionKey: string
 }): React.JSX.Element {
-  if (status.phase === 'loading') {
-    return <TriviumLoadingScreen />
+  const { status, frame } = page
+  if (!workspace) {
+    return <TriviumNoWorkspaceScreen />
   }
-  if (status.phase === 'unsupported') {
-    return <TriviumUnsupportedScreen host={status.host} reason={status.reason} />
-  }
-  if (status.phase === 'unavailable') {
+  if (frame) {
     return (
-      <TriviumUnavailableScreen host={status.host} reason={status.reason} detail={status.detail} />
-    )
-  }
-  if (status.phase === 'service-error') {
-    return (
-      <TriviumServiceErrorScreen
-        code={status.reason}
-        message={status.detail}
-        onRetry={status.refresh}
+      <TriviumSplit
+        key={frame.storageKey}
+        start={
+          <TriviumStructurePane
+            model={frame.model}
+            entries={frame.entries}
+            navigation={frame.navigation}
+            changes={frame.changes.changes}
+            needsYouCount={frame.needsYouCount}
+            ticketCount={frame.model.ticketIds.length}
+          />
+        }
+        end={
+          <TriviumReader
+            model={frame.model}
+            entries={frame.entries}
+            navigation={frame.navigation}
+            changes={frame.changes.changes}
+            loadState={frame.loadState}
+            workspaceId={workspace.id}
+            sessionKey={sessionKey}
+          />
+        }
       />
     )
   }
-  if (status.phase === 'error' || !status.data) {
-    return <TriviumErrorScreen reason={status.reason} onRetry={status.refresh} />
+  if (status.data?.state === 'no-harness') {
+    return <TriviumNoHarnessScreen workspaceId={workspace.id} sessionKey={sessionKey} />
   }
-  const data = status.data
-  if (data.state === 'no-harness') {
-    return <TriviumNoHarnessScreen requestedPath={data.requested_path} />
+  switch (status.phase) {
+    case 'unsupported':
+      return <TriviumUnsupportedScreen host={status.host} reason={status.reason} />
+    case 'unavailable':
+      return (
+        <TriviumUnavailableScreen
+          host={status.host}
+          reason={status.reason}
+          detail={status.detail}
+          onRetry={status.refresh}
+        />
+      )
+    case 'service-error':
+      return (
+        <TriviumServiceErrorScreen
+          code={status.reason}
+          message={status.detail}
+          onRetry={status.refresh}
+        />
+      )
+    case 'error':
+      return <TriviumUnreachableScreen reason={status.reason} onRetry={status.refresh} />
+    case 'loading':
+    case 'ready':
+      return <TriviumLoadingScreen />
   }
-  return (
-    <TriviumWorkspaceView
-      key={sessionKey}
-      data={data}
-      workspaceId={workspaceId}
-      sessionKey={sessionKey}
-    />
-  )
 }
 
-/** Full-page Track A harness state for the active workspace (git worktree or folder). */
+/** Escape leaves the page unless an overlay, a text field or a terminal owns the key. */
+function useTriviumPageEscape(close: () => void): void {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key !== 'Escape' || hasVisibleOverlay()) {
+        return
+      }
+      const target = event.target instanceof HTMLElement ? event.target : null
+      if (
+        target?.closest('.xterm') ||
+        target?.matches('input, textarea, select, [contenteditable="true"], [contenteditable=""]')
+      ) {
+        return
+      }
+      event.preventDefault()
+      close()
+    }
+    // Capture Escape before tooltip listeners consume it.
+    window.addEventListener('keydown', handleKeyDown, { capture: true })
+    return () => window.removeEventListener('keydown', handleKeyDown, { capture: true })
+  }, [close])
+}
+
+/**
+ * Full-page Track A harness state for the active workspace (git worktree or folder): one header
+ * band, then the Goal structure beside the reader. Everything is read-only; changes go through
+ * an agent session.
+ */
 export default function TriviumPage(): React.JSX.Element {
   const closeTriviumPage = useAppStore((state) => state.closeTriviumPage)
   const workspace = useTriviumActiveWorkspace()
@@ -74,47 +130,18 @@ export default function TriviumPage(): React.JSX.Element {
     workspace?.id,
     workspace?.path
   ])
-  const status = useTriviumWorkspaceStatus(
-    workspace?.id ?? null,
-    workspace?.path ?? null,
-    workspace?.connectionId
-  )
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key !== 'Escape') {
-        return
-      }
-      // Overlays own Escape before page navigation.
-      if (hasVisibleOverlay()) {
-        return
-      }
-      const target = event.target instanceof HTMLElement ? event.target : null
-      if (
-        target?.closest('.xterm, .react-flow') ||
-        target?.matches('input, textarea, select, [contenteditable="true"], [contenteditable=""]')
-      ) {
-        return
-      }
-      event.preventDefault()
-      closeTriviumPage()
-    }
-
-    // Capture Escape before tooltip listeners consume it.
-    window.addEventListener('keydown', handleKeyDown, { capture: true })
-    return () => window.removeEventListener('keydown', handleKeyDown, { capture: true })
-  }, [closeTriviumPage])
+  const page = useTriviumPageData(workspace)
+  useTriviumPageEscape(closeTriviumPage)
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-background">
       <TriviumHeader
-        workspaceName={workspace?.name ?? null}
-        workspacePath={workspace?.path ?? null}
-        status={status.data}
-        onBack={closeTriviumPage}
-        onRefresh={status.refresh}
+        state={workspace ? (page.status.data?.state ?? null) : null}
+        stale={workspace ? page.stale : null}
+        frame={page.frame}
+        onRefresh={page.refresh}
       />
-      <TriviumPageBody status={status} workspaceId={workspace?.id ?? ''} sessionKey={sessionKey} />
+      <TriviumPageBody workspace={workspace} page={page} sessionKey={sessionKey} />
     </div>
   )
 }

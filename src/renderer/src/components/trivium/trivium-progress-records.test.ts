@@ -1,13 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { buildTriviumAttention } from './trivium-attention-items'
 import { goalHasProgress, readTriviumProgress } from './trivium-progress-records'
 import { makeTriviumProgressRecord } from './trivium-progress-records.fixture'
-import { makeTriviumTicketRecords, makeTriviumDesignStatus } from './trivium-ticket-records.fixture'
-import { readTriviumTickets } from './trivium-ticket-records'
 import { makeTriviumModelProgress } from './trivium-model-progress.fixture'
 import { G0, G1_SEARCH, G2 } from './trivium-model-tables.fixture'
-
-const tickets = readTriviumTickets({ tickets: makeTriviumTicketRecords() })
 
 describe('readTriviumProgress', () => {
   it('reads Feature work from the Goal buckets, not from the campaign rows', () => {
@@ -65,97 +60,6 @@ describe('readTriviumProgress', () => {
     })
     expect(progress?.conflicts).toEqual([])
     expect(progress?.memory).toBeNull()
-  })
-})
-
-describe('buildTriviumAttention', () => {
-  it('orders what blocks work first and reads the milestone from the status projection', () => {
-    const status = makeTriviumDesignStatus()
-    const progress = readTriviumProgress(makeTriviumProgressRecord())
-    const items = buildTriviumAttention({ status, tickets, progress })
-    expect(items.map((item) => item.kind)).toEqual(['blocked', 'milestone', 'candidate'])
-    expect(items[0]).toMatchObject({ ticket: { id: 'ticket.expired' } })
-    expect(items[1]).toMatchObject({
-      milestone: { summary: 'Three Features landed; retry policy is still unverified.' },
-      goalId: 'goal.outcome'
-    })
-    expect(items[2]).toMatchObject({ ticket: { id: 'ticket.limits' } })
-  })
-
-  it('falls back to the status projection for a paused Campaign until progress answers', () => {
-    const status = makeTriviumDesignStatus()
-    status.campaigns.open = [
-      {
-        campaign_id: 'campaign.uploads',
-        goal_id: 'goal.outcome',
-        phase: 'paused',
-        pause_code: 'budget',
-        current_feature: 'feature.resume',
-        holder: null,
-        generation: 3
-      }
-    ]
-    status.escalations = [
-      { feature_id: 'feature.resume', intent_id: 'intent.resume', reasons: ['Token expired.'] }
-    ]
-    const withoutProgress = buildTriviumAttention({ status, tickets: [], progress: null })
-    expect(withoutProgress.slice(0, 2)).toEqual([
-      {
-        kind: 'paused',
-        campaignId: 'campaign.uploads',
-        code: 'budget',
-        reason: '',
-        goalId: 'goal.outcome'
-      },
-      {
-        kind: 'escalation',
-        featureId: 'feature.resume',
-        intentId: 'intent.resume',
-        reasons: ['Token expired.']
-      }
-    ])
-    const record = makeTriviumProgressRecord()
-    record.conflicts = [
-      {
-        kind: 'paused',
-        campaign_id: 'campaign.uploads',
-        feature_id: 'feature.resume',
-        code: 'budget',
-        reason: 'The context budget was exceeded twice.'
-      },
-      {
-        kind: 'health',
-        health: 'degraded',
-        execution_policy: 'learning',
-        reasons: ['Stale slice.']
-      }
-    ]
-    const withProgress = buildTriviumAttention({
-      status,
-      tickets: [],
-      progress: readTriviumProgress(record)
-    })
-    expect(withProgress.map((item) => item.kind)).toEqual([
-      'paused',
-      'escalation',
-      'health',
-      'milestone'
-    ])
-    expect(withProgress[0]).toMatchObject({ reason: 'The context budget was exceeded twice.' })
-  })
-
-  it('keeps only the selected Campaign in scope', () => {
-    const status = makeTriviumDesignStatus()
-    const progress = readTriviumProgress(makeTriviumProgressRecord())
-    const other = buildTriviumAttention({ status, tickets, progress, campaignId: 'campaign.other' })
-    expect(other.map((item) => item.kind)).toEqual(['blocked', 'candidate'])
-    const same = buildTriviumAttention({
-      status,
-      tickets,
-      progress,
-      campaignId: 'campaign.uploads'
-    })
-    expect(same.map((item) => item.kind)).toEqual(['blocked', 'milestone', 'candidate'])
   })
 })
 

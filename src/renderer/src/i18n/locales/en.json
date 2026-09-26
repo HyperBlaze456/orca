@@ -17030,105 +17030,6 @@
         "label": "Unlink {{value0}} from workspace",
         "description": "Orca will hide {{value0}} {{value1}} details for this workspace. The {{value0}} and branch on {{value2}} won’t be changed."
       },
-      "trivium": {
-        "TriviumCampaignsSection": {
-          "title": "Campaigns",
-          "closed": "{{count}} closed",
-          "empty": "No open Campaign.",
-          "goal": "Goal",
-          "currentFeature": "Current Feature",
-          "holder": "Holder",
-          "generation": "Generation"
-        },
-        "TriviumEscalationsSection": {
-          "title": "Escalations",
-          "empty": "Nothing is waiting on a decision from you."
-        },
-        "TriviumGoalsSection": {
-          "empty": "No Goals yet. Run a Goal interview to adopt one."
-        },
-        "TriviumHeader": {
-          "back": "Back",
-          "title": "Trivium",
-          "workerWorktree": "Worker worktree — showing the main worktree’s harness",
-          "refresh": "Refresh",
-          "harnessRoot": "Harness root",
-          "event": "Event",
-          "revision": "Revision",
-          "workerWorktreeOf": "Worker worktree — showing the harness of {{repository}}"
-        },
-        "TriviumHistorySection": {
-          "title": "History",
-          "campaigns": "Campaigns",
-          "features": "Features",
-          "publications": "Publications",
-          "theoryNodes": "Theory nodes",
-          "warnings": "Warnings"
-        },
-        "TriviumInterviewsSection": {
-          "title": "Interviews",
-          "empty": "No interview session is open."
-        },
-        "TriviumMilestoneSection": {
-          "title": "Milestone",
-          "empty": "No Campaign is standing at a milestone.",
-          "noSummary": "The milestone recorded no summary.",
-          "unknowns": "Unknowns",
-          "contradictions": "Contradictions",
-          "promotionCandidates": "Promotion candidates"
-        },
-        "TriviumStateScreens": {
-          "copyCommand": "Copy command",
-          "loading": "Reading harness state…",
-          "noHarnessTitle": "No Trivium harness here",
-          "noHarnessAtPath": "There is no .trivium directory at or above {{path}}. Initialize the harness to start tracking Goals, Campaigns and tickets.",
-          "noHarness": "There is no .trivium directory in this workspace. Initialize the harness to start tracking Goals, Campaigns and tickets.",
-          "unsupportedTitle": "Trivium is not available on this host",
-          "unsupportedHost": "Trivium reads the workspace on the execution host that owns it. The host {{host}} does not answer Trivium requests yet.",
-          "unsupportedNoHost": "Trivium reads the workspace on the execution host that owns it. This workspace has no host that answers Trivium requests yet.",
-          "unavailableTitle": "The trivium program did not run",
-          "unavailableHost": "The host {{host}} accepted the request but could not start trivium.",
-          "unavailable": "The host accepted the request but could not start trivium.",
-          "executableOverride": "Set {{variable}} on the execution host to point at the executable.",
-          "errorTitle": "Could not read the harness",
-          "errorFallback": "The status request failed without a message.",
-          "retry": "Retry",
-          "remoteExecutionHost": "Trivium reads the harness through the process that owns the workspace filesystem, and that process does not serve this host yet.",
-          "serviceErrorTitle": "Trivium answered, but not with a status",
-          "serviceErrorDescription": "The harness service is running and refused this read. Its own code is below."
-        },
-        "TriviumTicketsSection": {
-          "title": "Tickets",
-          "empty": "No tickets. The G3 tier is unused in this repository.",
-          "noCandidates": "No candidate tickets are waiting for approval.",
-          "candidate": "Candidate",
-          "parent": "Parent",
-          "copyApprove": "Copy approve command"
-        },
-        "state": {
-          "noHarness": "No harness",
-          "noAdoptedGoal": "No adopted Goal",
-          "goalDraft": "Goal draft",
-          "escalated": "Escalated",
-          "paused": "Paused",
-          "active": "Active",
-          "review": "Review",
-          "runnable": "Runnable"
-        },
-        "tier": {
-          "g0": "G0 · Purpose",
-          "g1": "G1 · Outcome",
-          "g2": "G2 · Capability",
-          "g3": "G3 · Ticket"
-        },
-        "ticketState": {
-          "open": "Open",
-          "inProgress": "In progress",
-          "blocked": "Blocked",
-          "done": "Done",
-          "abandoned": "Abandoned"
-        }
-      },
       "UnexpectedSignoutCard": {
         "9f2c1a4b7d": "You've been signed out",
         "3e8f5c2a91": "Dismiss",
@@ -18124,95 +18025,9 @@
     "retry": "Retry"
   },
   "trivium": {
-    "graph": {
-      "keyboardSelect": "Press Enter or Space to select a node.",
-      "keyboardMove": "Press Enter or Space to select a node, then use arrow keys to move it.",
-      "title": "Goal graph",
-      "details": "Workspace details",
-      "count": "{{count}} goals",
-      "show": "Show",
-      "notRejected": "Except rejected",
-      "all": "All goals",
-      "adopted": "Adopted",
-      "anticipated": "Anticipated",
-      "candidate": "Candidate",
-      "rejected": "Rejected",
-      "textSize": "Text size",
-      "standard": "Standard",
-      "large": "Large",
-      "visibleCount": "{{visible}} / {{total}} goals",
-      "actualSize": "Reset zoom to 100%",
-      "noMatches": "No goals match this filter.",
-      "readingOrder": "Top to bottom: Purpose → Outcome → Capability → Ticket",
-      "edgeLegend": "Solid: contributes to · Dashed: depends on"
-    },
-    "session": {
-      "title": "Session",
-      "choose": "Choose an agent session",
-      "continuity": "Node requests continue in this session.",
-      "unavailable": "This session is unavailable. Reconnect or choose another session.",
-      "empty": "Start an agent in this workspace to continue here.",
-      "openWorkspace": "Open workspace",
-      "request": "What should change?",
-      "send": "Send to session"
-    },
     "inspect": {
-      "item": "Item {{number}}",
-      "noRecords": "No records.",
-      "tickets": "Ticket details",
-      "progress": "Progress details",
-      "readOnly": "Read-only details. Expand a record to explore its contents.",
-      "refresh": "Refresh details",
-      "clearScope": "Show entire workspace",
-      "searchTickets": "Search ticket details",
-      "searchPlaceholder": "Search titles, descriptions or IDs…",
-      "loading": "Loading details…",
-      "chooseGoal": "Select a goal in the graph or goal list to read its full description and explore its connections.",
-      "parents": "Contributes to",
-      "children": "Contributing goals",
-      "dependencies": "Depends on",
-      "dependents": "Required by",
-      "goalDetails": "Goal details",
-      "noStatement": "No description was recorded for this goal.",
-      "missingGoal": "Details are not included in this snapshot.",
-      "relatedWork": "Related work",
-      "goalTickets": "Browse tickets under this goal",
-      "campaignProgress": "Read campaign progress",
-      "searchGoals": "Search goals",
-      "listScope": "All statuses are included. Select a goal to read more.",
       "unsupported": "This host cannot provide these details.",
-      "invalid": "The host returned an unreadable response.",
-      "goalList": "Goal list",
-      "browseTickets": "Browse all ticket records",
-      "browseProgress": "Read full progress",
-      "back": "Previous goal",
-      "fields": {
-        "goals": "Goals",
-        "campaigns": "Campaigns",
-        "features": "Features",
-        "conflicts": "Conflicts",
-        "memory_delta": "Memory delta",
-        "theory_authority": "Theory authority",
-        "micro": "Micro",
-        "title": "Title",
-        "statement": "Statement",
-        "summary": "Summary",
-        "state": "State",
-        "status": "Status",
-        "phase": "Phase",
-        "id": "Id",
-        "goal_id": "Goal id",
-        "campaign_id": "Campaign id",
-        "feature_id": "Feature id",
-        "evidence": "Evidence",
-        "current": "Current",
-        "representative": "Representative",
-        "added": "Added",
-        "suspect": "Suspect",
-        "superseded": "Superseded",
-        "revalidated": "Revalidated",
-        "invalid": "Invalid"
-      }
+      "invalid": "The host returned an unreadable response."
     },
     "changeDot": {
       "new": "New since your last visit",
@@ -18529,6 +18344,57 @@
       "details": "Details",
       "files": "Files",
       "copyId": "Copy ID"
+    },
+    "changes": {
+      "new": "{{n}} new",
+      "changed": "{{n}} changed",
+      "removed": "{{n}} removed",
+      "title": "Since your last visit",
+      "label": "Changes since your last visit",
+      "removedTitle": "No longer in the Goal model",
+      "markSeen": "Mark as seen"
+    },
+    "header": {
+      "stale": "Can't reach Trivium. Showing the last data received.",
+      "staleSince": "Can't reach Trivium. Showing data from {{time}}.",
+      "retry": "Retry",
+      "refresh": "Refresh",
+      "title": "Trivium"
+    },
+    "split": {
+      "resize": "Resize the structure pane"
+    },
+    "screen": {
+      "remoteExecutionHost": "Trivium reads the harness through the process that owns the workspace filesystem, and that process does not serve this host yet.",
+      "retry": "Retry",
+      "loading": "Reading harness state…",
+      "noWorkspaceTitle": "No workspace selected",
+      "noWorkspace": "Select a workspace in the sidebar to see its Trivium harness.",
+      "noHarnessTitle": "This workspace has no Trivium harness",
+      "noHarness": "Trivium keeps Goals, tickets and memory in `.trivium/` at the repository root. Start it from an agent session in this workspace.",
+      "askSetup": "Ask the agent to set it up",
+      "copyCommand": "Copy command",
+      "unsupportedTitle": "Trivium is not available on this host",
+      "unsupportedHost": "Trivium reads the workspace on the execution host that owns it. The host {{host}} does not answer Trivium requests yet.",
+      "unsupportedNoHost": "Trivium reads the workspace on the execution host that owns it. This workspace has no host that answers Trivium requests yet.",
+      "unavailableTitle": "The trivium program did not run",
+      "unavailableHost": "The host {{host}} accepted the request but could not start trivium.",
+      "unavailable": "The host accepted the request but could not start trivium.",
+      "executableOverride": "Set {{variable}} on the execution host to point at the executable.",
+      "serviceErrorTitle": "Trivium answered, but not with a status",
+      "serviceError": "The harness service is running and refused this read. Its own code is below.",
+      "unreachableTitle": "Can't reach Trivium",
+      "unreachable": "The status request did not get an answer from the execution host."
+    },
+    "state": {
+      "review": "Milestone ready for review",
+      "runnable": "Ready to run",
+      "active": "Campaign running",
+      "paused": "Paused, needs your decision",
+      "escalated": "Needs your decision",
+      "goalDraft": "Goal draft to review",
+      "noAdoptedGoal": "No Goal adopted",
+      "noHarness": "Not set up in this workspace"
     }
   }
 }

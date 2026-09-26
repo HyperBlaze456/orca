@@ -1,125 +1,123 @@
-import { ArrowLeft, GitBranch, RefreshCw } from 'lucide-react'
-import type { TriviumWorkspaceStatus } from '../../../../shared/trivium-workspace-status'
-import { Badge } from '../ui/badge'
-import { Button } from '../ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
+import { useRef } from 'react'
+import { CloudOff, RefreshCw } from 'lucide-react'
+import type { TriviumWorkspaceState } from '../../../../shared/trivium-workspace-status'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import {
-  shortenTriviumId,
-  triviumStateBadgeVariant,
-  triviumStateLabel
-} from './trivium-status-display'
+import type { TriviumPageFrame } from './trivium-page-data'
+import { formatTriviumClockTime, type TriviumStaleNotice } from './trivium-page-load'
+import { triviumStatePhrase } from './trivium-status-display'
+import { TriviumChangesPopover } from './TriviumChangesPopover'
+import { TriviumMilestoneDiamond } from './TriviumIcons'
+import { TriviumInfoPopover } from './TriviumInfoPopover'
 
-function PublicationId({ label, value }: { label: string; value: string }): React.JSX.Element {
+export type TriviumHeaderFrame = Pick<
+  TriviumPageFrame,
+  'model' | 'entries' | 'changes' | 'navigation' | 'loadState'
+>
+
+function TriviumHeaderState({ state }: { state: TriviumWorkspaceState }): React.JSX.Element {
   return (
-    <span className="inline-flex items-center gap-1">
-      <span className="text-[11px] tracking-[0.05em] text-muted-foreground uppercase">{label}</span>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className="font-mono text-xs text-foreground">{shortenTriviumId(value)}</span>
-        </TooltipTrigger>
-        <TooltipContent side="top" sideOffset={4}>
-          <span className="font-mono text-xs">{value}</span>
-        </TooltipContent>
-      </Tooltip>
+    <span
+      data-trivium-state={state}
+      className="flex min-w-0 items-center gap-1.5 text-[13px] text-muted-foreground"
+    >
+      {state === 'review' ? <TriviumMilestoneDiamond review size={13} /> : null}
+      <span className="truncate">{triviumStatePhrase(state)}</span>
     </span>
   )
 }
 
-/** Back control, workspace identity, and the state banner every Trivium screen shares. */
-export function TriviumHeader({
-  workspaceName,
-  workspacePath,
-  status,
-  onBack,
-  onRefresh
+/** Shown only while a failed read leaves older data on screen; never says anything ended. */
+function TriviumHeaderStale({
+  since,
+  onRetry
 }: {
-  workspaceName: string | null
-  workspacePath: string | null
-  status: TriviumWorkspaceStatus | null
-  onBack: () => void
-  onRefresh?: () => void
+  since: number | null
+  onRetry: () => void
 }): React.JSX.Element {
   return (
-    <div className="shrink-0 border-b border-border px-5 py-3">
-      <div className="flex items-center gap-3">
-        <Button variant="outline" size="sm" onClick={onBack} className="shrink-0 gap-1.5">
-          <ArrowLeft className="size-3.5" />
-          {translate('auto.components.trivium.TriviumHeader.back', 'Back')}
-        </Button>
-        <div className="min-w-0 flex-1">
-          <div className="flex min-w-0 items-center gap-2">
-            <h1 className="truncate text-base font-semibold text-foreground">
-              {workspaceName ?? translate('auto.components.trivium.TriviumHeader.title', 'Trivium')}
-            </h1>
-            {status ? (
-              <Badge
-                variant={triviumStateBadgeVariant(status.state)}
-                data-trivium-state={status.state}
-              >
-                {triviumStateLabel(status.state)}
-              </Badge>
-            ) : null}
-            {status?.is_worker_worktree ? (
-              <Badge variant="outline" className="gap-1">
-                <GitBranch />
-                {status.repository_root
-                  ? translate(
-                      'auto.components.trivium.TriviumHeader.workerWorktreeOf',
-                      'Worker worktree — showing the harness of {{repository}}',
-                      { repository: status.repository_root }
-                    )
-                  : translate(
-                      'auto.components.trivium.TriviumHeader.workerWorktree',
-                      'Worker worktree — showing the main worktree’s harness'
-                    )}
-              </Badge>
-            ) : null}
-          </div>
-          {workspacePath ? (
-            <p className="truncate font-mono text-xs text-muted-foreground">{workspacePath}</p>
-          ) : null}
-        </div>
-        {onRefresh ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" onClick={onRefresh} className="shrink-0">
-                <RefreshCw />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top" sideOffset={4}>
-              {translate('auto.components.trivium.TriviumHeader.refresh', 'Refresh')}
-            </TooltipContent>
-          </Tooltip>
-        ) : null}
-      </div>
-      {status ? (
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
-          {status.state_reason ? (
-            <p className="text-xs text-muted-foreground">{status.state_reason}</p>
-          ) : null}
-          {status.harness_root ? (
-            <span className="inline-flex items-center gap-1">
-              <span className="text-[11px] tracking-[0.05em] text-muted-foreground uppercase">
-                {translate('auto.components.trivium.TriviumHeader.harnessRoot', 'Harness root')}
-              </span>
-              <span className="font-mono text-xs text-foreground">{status.harness_root}</span>
-            </span>
-          ) : null}
-          {status.publication ? (
-            <>
-              <PublicationId
-                label={translate('auto.components.trivium.TriviumHeader.event', 'Event')}
-                value={status.publication.event_id}
-              />
-              <PublicationId
-                label={translate('auto.components.trivium.TriviumHeader.revision', 'Revision')}
-                value={status.publication.model_revision}
-              />
-            </>
-          ) : null}
-        </div>
-      ) : null}
+    <div data-trivium-stale="" className="mr-1.5 flex min-w-0 items-center gap-1.5 text-xs">
+      <CloudOff aria-hidden="true" className="size-3.5 shrink-0" />
+      <span role="status" className="truncate">
+        {since === null
+          ? translate(
+              'trivium.header.stale',
+              "Can't reach Trivium. Showing the last data received."
+            )
+          : translate(
+              'trivium.header.staleSince',
+              "Can't reach Trivium. Showing data from {{time}}.",
+              {
+                time: formatTriviumClockTime(since)
+              }
+            )}
+      </span>
+      <Button variant="outline" size="xs" onClick={onRetry}>
+        {translate('trivium.header.retry', 'Retry')}
+      </Button>
     </div>
+  )
+}
+
+/**
+ * The page's one 48px band: title, the workspace state in words, then freshness, the changes
+ * chip, workspace details and Refresh. No back button: the sidebar leaves the page.
+ */
+export function TriviumHeader({
+  state,
+  stale,
+  frame,
+  onRefresh
+}: {
+  state: TriviumWorkspaceState | null
+  stale: TriviumStaleNotice | null
+  /** The model's controls (changes, details) once a harness answered. */
+  frame: TriviumHeaderFrame | null
+  onRefresh: () => void
+}): React.JSX.Element {
+  const refreshLabel = translate('trivium.header.refresh', 'Refresh')
+  const refreshButton = useRef<HTMLButtonElement>(null)
+  return (
+    <header
+      data-trivium-header=""
+      className="flex h-12 shrink-0 items-center gap-3 border-b border-border pl-5 pr-[max(0.625rem,var(--window-controls-width,0px))]"
+    >
+      <h1 className="shrink-0 text-base leading-8 font-semibold">
+        {translate('trivium.header.title', 'Trivium')}
+      </h1>
+      {state ? <TriviumHeaderState state={state} /> : null}
+      <div className="ml-auto flex min-w-0 items-center gap-1 text-muted-foreground">
+        {stale ? <TriviumHeaderStale since={stale.since} onRetry={onRefresh} /> : null}
+        {frame ? (
+          <TriviumChangesPopover
+            model={frame.model}
+            entries={frame.entries}
+            changes={frame.changes}
+            navigation={frame.navigation}
+            loadState={frame.loadState}
+            onCleared={() => refreshButton.current?.focus()}
+          />
+        ) : null}
+        {frame ? <TriviumInfoPopover model={frame.model} /> : null}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              ref={refreshButton}
+              variant="ghost"
+              size="icon-xs"
+              aria-label={refreshLabel}
+              data-trivium-refresh=""
+              onClick={onRefresh}
+            >
+              <RefreshCw aria-hidden="true" className="size-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" sideOffset={4}>
+            {refreshLabel}
+          </TooltipContent>
+        </Tooltip>
+      </div>
+    </header>
   )
 }

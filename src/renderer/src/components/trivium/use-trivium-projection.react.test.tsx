@@ -72,3 +72,70 @@ describe('Trivium read-only details', () => {
     expect(result.current.error).toBeUndefined()
   })
 })
+
+it('keeps the last host response after a failed refresh, and replaces it after retry', async () => {
+  const snapshot = { supported: true, tickets: [{ id: 'ticket.done', state: 'done' }] }
+  call
+    .mockResolvedValueOnce(snapshot)
+    .mockRejectedValueOnce(new Error('Execution host is unreachable.'))
+    .mockResolvedValueOnce({ supported: true, tickets: [] })
+  const { result } = renderHook(() => useTriviumProjection('folder:notes', { kind: 'tickets' }))
+  await waitFor(() => expect(result.current.data).toEqual(snapshot))
+  const updatedAt = result.current.updatedAt
+  act(() => result.current.refresh())
+  expect(result.current.data).toEqual(snapshot)
+  await waitFor(() => expect(result.current.error).toBe('Execution host is unreachable.'))
+  expect(result.current.data).toEqual(snapshot)
+  expect(result.current.updatedAt).toBe(updatedAt)
+  act(() => result.current.refresh())
+  await waitFor(() => expect(result.current.data?.tickets).toEqual([]))
+  expect(result.current.error).toBeUndefined()
+})
+
+it('never carries a stale response across workspace or scope changes', async () => {
+  call
+    .mockResolvedValueOnce({ supported: true, tickets: [{ id: 'ticket.old' }] })
+    .mockRejectedValue(new Error('Offline'))
+  const { result, rerender } = renderHook(
+    ({ id }) => useTriviumProjection(id, { kind: 'tickets' }),
+    { initialProps: { id: 'old' } }
+  )
+  await waitFor(() => expect(result.current.data?.tickets).toHaveLength(1))
+  rerender({ id: 'new' })
+  expect(result.current.data).toBeUndefined()
+  await waitFor(() => expect(result.current.error).toBe('Offline'))
+  expect(result.current.data).toBeUndefined()
+})
+
+it('reads nothing while there is no workspace to read', async () => {
+  const { result } = renderHook(() => useTriviumProjection(null, { kind: 'tickets' }, 1))
+  await act(async () => {
+    await Promise.resolve()
+  })
+  expect(call).not.toHaveBeenCalled()
+  expect(result.current).toMatchObject({ data: undefined, error: undefined, loading: false })
+})
+
+it('reads again for each refresh token and reports that read until it answers', async () => {
+  let finishSecond: (value: unknown) => void = () => {}
+  call.mockResolvedValueOnce({ supported: true, tickets: [] }).mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finishSecond = resolve
+      })
+  )
+  const { result, rerender } = renderHook(
+    ({ token }) => useTriviumProjection('folder:notes', { kind: 'tickets' }, token),
+    { initialProps: { token: 1 } }
+  )
+  await waitFor(() => expect(result.current.loading).toBe(false))
+  rerender({ token: 2 })
+  expect(result.current.loading).toBe(true)
+  expect(result.current.data?.tickets).toEqual([])
+  await act(async () => {
+    finishSecond({ supported: true, tickets: [{ id: 'ticket.new' }] })
+  })
+  expect(result.current.loading).toBe(false)
+  expect(result.current.data?.tickets).toEqual([{ id: 'ticket.new' }])
+  expect(call).toHaveBeenCalledTimes(2)
+})

@@ -22,8 +22,6 @@ import { attachRepoAndOpenTerminal } from './helpers/orca-restart'
 
 const REPO_A = '/Users/hyperblaze/Desktop/coding/harnesses/trivium'
 const TRIVIUM_BIN = '/Users/hyperblaze/.local/bin/trivium'
-const SCREENSHOT_DIR =
-  '/private/tmp/claude-501/-Users-hyperblaze-Desktop-coding-harnesses-trivium/671be59e-96c9-456c-bba5-f0e35942cb2e/scratchpad'
 
 type BridgeStatus = {
   state: string
@@ -68,7 +66,7 @@ function expectationsOrSkip(): Expectations {
   // spec would be asserting against something else, so fail here with the reason.
   expect(status.state, 'repo A is expected to be in the `review` state').toBe('review')
   expect(status.goals.counts.g0, 'repo A is expected to have exactly one G0').toBe(1)
-  expect(status.goals.counts.g1, 'repo A is expected to have exactly one G1').toBe(1)
+  expect(status.goals.counts.g1, 'repo A is expected to have exactly two G1s').toBe(2)
   expect(g0, 'repo A is expected to expose a G0 node').toBeTruthy()
   expect(candidate, 'repo A is expected to have one candidate ticket').toBeTruthy()
   expect(candidate.approve_command).toContain('trivium model ticket approve')
@@ -132,7 +130,7 @@ test.describe('with TRIVIUM_EXECUTABLE pointing at the installed CLI', () => {
   test('renders the harness of an initialized repo and the no-harness screen elsewhere', async ({
     orcaPage,
     testRepoPath
-  }) => {
+  }, testInfo) => {
     test.setTimeout(300_000)
     const expected = expectationsOrSkip()
 
@@ -143,20 +141,33 @@ test.describe('with TRIVIUM_EXECUTABLE pointing at the installed CLI', () => {
     // Repo A: the bridge payload reaches the render layer.
     const stateBadge = orcaPage.locator(`[data-trivium-state="${expected.state}"]`)
     await expect(stateBadge).toBeVisible({ timeout: 60_000 })
-    await expect(orcaPage.getByText(expected.g0Title, { exact: true })).toBeVisible()
-    await orcaPage.getByRole('tab', { name: 'Workspace details' }).click()
+    await expect(
+      orcaPage.getByRole('tree', { name: 'Goals and tickets' }).getByText(expected.g0Title, {
+        exact: true
+      })
+    ).toBeVisible()
+    await expect(
+      orcaPage.locator(`[data-trivium-campaign="${expected.milestoneCampaignId}"]`)
+    ).toBeVisible({ timeout: 60_000 })
+    await orcaPage.screenshot({ path: testInfo.outputPath('trivium-review.png') })
+    // The first candidate's Review opens its ticket page, where the approve command is shown.
+    await orcaPage
+      .locator('[data-trivium-needs-you="candidate"]')
+      .first()
+      .getByRole('button', { name: 'Review' })
+      .click()
     await expect(orcaPage.getByText(expected.approveCommand, { exact: true })).toBeVisible()
-    await expect(orcaPage.getByText(expected.milestoneCampaignId, { exact: true })).toBeVisible()
-    await orcaPage.screenshot({ path: path.join(SCREENSHOT_DIR, 'trivium-review.png') })
 
     // Repo B: a git repo with no `.trivium/` is a normal state, not an error.
     await activateRepoWorktree(orcaPage, testRepoPath, REPO_A)
     await expect(orcaPage.locator('[data-trivium-state="no-harness"]')).toBeVisible({
       timeout: 60_000
     })
-    await expect(orcaPage.getByText('trivium model init', { exact: true })).toBeVisible()
+    await expect(
+      orcaPage.getByRole('button', { name: 'Ask the agent to set it up', exact: true })
+    ).toBeVisible()
     await expect(stateBadge).not.toBeVisible()
-    await orcaPage.screenshot({ path: path.join(SCREENSHOT_DIR, 'trivium-no-harness.png') })
+    await orcaPage.screenshot({ path: testInfo.outputPath('trivium-no-harness.png') })
   })
 })
 
