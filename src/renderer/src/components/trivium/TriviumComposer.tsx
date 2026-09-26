@@ -1,6 +1,7 @@
 import { useEffect, useState, type RefObject } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { selectFloatingTerminalTriggerVisible } from '@/components/floating-terminal/floating-terminal-trigger-visibility'
 import {
   Select,
   SelectContent,
@@ -14,6 +15,7 @@ import {
   useImeEnterGestureOwnership
 } from '@/lib/ime-composition-keyboard-event'
 import { cn } from '@/lib/utils'
+import { useAppStore } from '@/store'
 import {
   buildTriviumComposerPrompt,
   describeTriviumItemForAgent,
@@ -57,6 +59,7 @@ export function TriviumComposer({
   const { session, targets, selectTarget, send, canSend, disabledReason, update } =
     useTriviumSession(workspaceId, sessionKey)
   const imeEnterGesture = useImeEnterGestureOwnership()
+  const floatingTriggerShown = useAppStore(selectFloatingTerminalTriggerVisible)
   const [sentTo, setSentTo] = useState<string | null>(null)
   const [showSending, setShowSending] = useState(false)
 
@@ -107,7 +110,11 @@ export function TriviumComposer({
   return (
     <div
       data-trivium-composer=""
-      className="shrink-0 border-t border-border bg-background px-4 pt-3 pb-3.5"
+      className={cn(
+        'shrink-0 border-t border-border bg-background px-4 pt-3 pb-3.5',
+        // Why: the floating-terminal trigger defaults to 24px + 36px from the right edge, level with Send.
+        floatingTriggerShown && 'pr-[72px]'
+      )}
     >
       <div className="mx-auto max-w-[860px] @min-[720px]/reader:px-6">
         <div className="rounded-[10px] border border-input bg-transparent px-2.5 py-2 shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30">
