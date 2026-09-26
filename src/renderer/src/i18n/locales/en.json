@@ -18251,6 +18251,39 @@
       "open": "Open",
       "done": "Done",
       "abandoned": "Abandoned"
+    },
+    "tree": {
+      "ticketCountOne": "1 ticket",
+      "ticketCountMany": "{{count}} tickets",
+      "goalCountOne": "1 goal",
+      "goalCountMany": "{{count}} goals",
+      "newCount": "{{count}} new",
+      "changedCount": "{{count}} changed",
+      "status": {
+        "anticipated": "Anticipated",
+        "candidate": "Candidate"
+      },
+      "collapse": "Collapse",
+      "expand": "Expand"
+    },
+    "structure": {
+      "noMatches": "No goals or tickets match.",
+      "empty": "No goals yet.",
+      "tree": "Goals and tickets",
+      "views": "Trivium views",
+      "overview": "Overview",
+      "needsYouCount": "{{count}} need you",
+      "allTickets": "All tickets",
+      "showAllDependencies": "Show every dependency",
+      "label": "Goal structure",
+      "goals": "Goals",
+      "filter": "Filter",
+      "filterLabel": "Filter goals and tickets"
+    },
+    "dependency": {
+      "explain": "Arrows point from a ticket to what it depends on.",
+      "none": "No dependencies between the rows shown.",
+      "hint": "Select or hover a ticket to see its dependencies."
     }
   }
 }
