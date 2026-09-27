@@ -7,6 +7,8 @@ import {
   sendNotesToActiveAgentSession
 } from '@/lib/active-agent-note-send'
 import { selectLivePtyIdsForWorktree } from '@/components/sidebar/worktree-card-status-inputs'
+import type { TuiAgent } from '../../../../shared/tui-agent'
+import { pickTriviumDefaultSessionTarget } from './trivium-new-session-targets'
 import {
   EMPTY_TRIVIUM_SESSION,
   useTriviumSessionState,
@@ -58,20 +60,44 @@ export function useTriviumSession(workspaceId: string, sessionKey: string) {
     }
     update(sessionKey, {
       target: { tabId: target.tabId, leafId: target.leafId, ptyId, title: target.tabTitle },
-      error: null
+      newSessionAgent: null,
+      launchedTabId: null,
+      error: null,
+      notice: null
     })
   }
 
+  function selectNewSession(agent: TuiAgent): void {
+    if (session.sending) {
+      return
+    }
+    update(sessionKey, { newSessionAgent: agent, launchedTabId: null, error: null, notice: null })
+  }
+
   useEffect(() => {
+    // Why: a session the composer started becomes the target, so follow-ups reach the same agent.
+    const launched = session.launchedTabId
+      ? targets.find((candidate) => candidate.tabId === session.launchedTabId)
+      : undefined
+    if (launched) {
+      update(sessionKey, {
+        target: {
+          tabId: launched.tabId,
+          leafId: launched.leafId,
+          ptyId: launched.ptyId,
+          title: launched.tabTitle
+        },
+        newSessionAgent: null,
+        launchedTabId: null
+      })
+      return
+    }
     if (session.target) {
       return
     }
     const activeTabId = useAppStore.getState().activeTabIdByWorktree[workspaceId]
     const activeLeafId = activeTabId ? terminalLayoutsByTabId[activeTabId]?.activeLeafId : null
-    const target =
-      targets.find(
-        (candidate) => candidate.tabId === activeTabId && candidate.leafId === activeLeafId
-      ) ?? targets[0]
+    const target = pickTriviumDefaultSessionTarget(targets, activeTabId, activeLeafId)
     if (!target) {
       return
     }
@@ -81,7 +107,15 @@ export function useTriviumSession(workspaceId: string, sessionKey: string) {
         target: { tabId: target.tabId, leafId: target.leafId, ptyId, title: target.tabTitle }
       })
     }
-  }, [session.target, targets, terminalLayoutsByTabId, workspaceId, sessionKey, update])
+  }, [
+    session.target,
+    session.launchedTabId,
+    targets,
+    terminalLayoutsByTabId,
+    workspaceId,
+    sessionKey,
+    update
+  ])
 
   const target = session.target
   const samePty =
@@ -108,7 +142,7 @@ export function useTriviumSession(workspaceId: string, sessionKey: string) {
     ) {
       return
     }
-    update(sessionKey, { sending: true, error: null })
+    update(sessionKey, { sending: true, error: null, notice: null })
     try {
       const result = await sendNotesToActiveAgentSession({
         worktreeId: workspaceId,
@@ -139,6 +173,7 @@ export function useTriviumSession(workspaceId: string, sessionKey: string) {
     session,
     targets,
     selectTarget,
+    selectNewSession,
     send,
     previewPtyId: samePty ? target.ptyId : null,
     canSend: currentTarget?.status === 'eligible' && !session.sending,

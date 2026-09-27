@@ -18532,7 +18532,16 @@
       "placeholderGoal": "Ask the agent about this goal…",
       "target": "Agent session",
       "noTarget": "No agent session",
-      "send": "Send"
+      "send": "Send",
+      "newSessionGroup": "New session",
+      "newSession": "New {{agent}} session",
+      "detectingAgents": "Detecting agents…",
+      "noAgentsDetected": "No agents detected",
+      "launchFailed": "Could not start {{agent}}.",
+      "launchStarted": "Started {{agent}} in this workspace.",
+      "launchNotDelivered": "{{agent}} started, but the request was not delivered. Check the new tab in this workspace.",
+      "launchSent": "Sent to {{agent}}. It runs in a new tab of this workspace.",
+      "starting": "Starting {{agent}}…"
     },
     "overview": {
       "headline": {

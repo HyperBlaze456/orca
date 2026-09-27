@@ -184,15 +184,15 @@ describe('Trivium composer', () => {
     expect(note()).not.toHaveTextContent('Sent to')
   })
 
-  it('cannot send without an agent session and says how to get one', async () => {
+  // WO-6: with no session the composer offers new sessions (TriviumComposerNewSession), so the old
+  // "start an agent session" note is gone; until an agent is detected there is nothing to send to.
+  it('cannot send without an agent session while no agent to start is known yet', async () => {
     useAppStore.setState(useAppStore.getInitialState(), true)
     renderWithTooltips(composer(G2))
     await type('Anything')
     expect(screen.getByRole('button', { name: 'Send' })).toBeDisabled()
     expect(screen.getByRole('combobox', { name: 'Agent session' })).toBeDisabled()
-    expect(note()).toHaveTextContent(
-      'Start an agent session in this workspace to send requests from here.'
-    )
+    expect(note()).toHaveTextContent(/^$/)
     fireEvent.keyDown(textbox(), { key: 'Enter', keyCode: 13 })
     expect(send).not.toHaveBeenCalled()
   })

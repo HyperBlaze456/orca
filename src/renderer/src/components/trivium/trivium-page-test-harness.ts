@@ -164,7 +164,9 @@ export function stubPageApi(): PageApi {
     configurable: true,
     value: {
       ui: { writeClipboardText: api.writeClipboardText },
-      fs: { watchWorktree: api.watchWorktree, unwatchWorktree: api.unwatchWorktree }
+      fs: { watchWorktree: api.watchWorktree, unwatchWorktree: api.unwatchWorktree },
+      // The composer's "New session" group asks the host which agents are installed.
+      preflight: { detectAgents: vi.fn().mockResolvedValue([]) }
     }
   })
   return api

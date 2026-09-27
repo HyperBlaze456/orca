@@ -5,11 +5,15 @@ import { selectFloatingTerminalTriggerVisible } from '@/components/floating-term
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
 import { translate } from '@/i18n/i18n'
+import { AgentIcon } from '@/lib/agent-catalog'
 import {
   isImeOwnedKeyboardEvent,
   useImeEnterGestureOwnership
@@ -27,18 +31,25 @@ import {
   triviumWorkLoadState,
   type TriviumDetailStates
 } from './trivium-reader-load'
+import {
+  buildTriviumComposerTargetItems,
+  findTriviumNewSessionAgent,
+  resolveTriviumNewSessionChoice
+} from './trivium-new-session-targets'
 import { triviumSessionTargetKey, useTriviumSessionState } from './trivium-session-state'
 import { TriviumTicketStatusIcon } from './TriviumIcons'
 import { TriviumReaderWorkRing } from './TriviumReaderWorkRing'
 import { TriviumRichText } from './TriviumRichText'
+import { useTriviumAgentLaunch } from './use-trivium-agent-launch'
 import { useTriviumSession } from './use-trivium-session'
 
 // Why: fast local sends show nothing; SSH round trips get a spinner after this delay.
 const SENDING_FEEDBACK_DELAY_MS = 200
 
 /**
- * Sends a request about the Goal or ticket on screen to an agent session. The item context is
- * captured when Send is pressed; the page itself changes nothing in the harness.
+ * Sends a request about the Goal or ticket on screen to an agent session, or starts a new one in
+ * the workspace with it. The item context is captured when Send is pressed; the page itself
+ * changes nothing in the harness.
  */
 export function TriviumComposer({
   model,
@@ -56,8 +67,17 @@ export function TriviumComposer({
   /** Keeps the context icon and the prompt from reading missing records as open or undone. */
   loadState?: TriviumDetailStates
 }): React.JSX.Element {
-  const { session, targets, selectTarget, send, canSend, disabledReason, update } =
-    useTriviumSession(workspaceId, sessionKey)
+  const {
+    session,
+    targets,
+    selectTarget,
+    selectNewSession,
+    send,
+    canSend,
+    disabledReason,
+    update
+  } = useTriviumSession(workspaceId, sessionKey)
+  const { newSessionGroup, launch } = useTriviumAgentLaunch(workspaceId, sessionKey)
   const imeEnterGesture = useImeEnterGestureOwnership()
   const floatingTriggerShown = useAppStore(selectFloatingTerminalTriggerVisible)
   const [sentTo, setSentTo] = useState<string | null>(null)
@@ -74,10 +94,21 @@ export function TriviumComposer({
 
   const isTicket = model.isTicket(itemId)
   const draft = session.draft
-  const selectedKey = session.target ? triviumSessionTargetKey(session.target) : ''
+  const newSessionChoice = resolveTriviumNewSessionChoice({
+    chosen: session.newSessionAgent,
+    hasSessions: targets.length > 0,
+    group: newSessionGroup
+  })
+  const selectedKey = newSessionChoice
+    ? newSessionChoice.key
+    : session.target
+      ? triviumSessionTargetKey(session.target)
+      : ''
+  const items = buildTriviumComposerTargetItems(targets, newSessionGroup)
+  const canSubmit = newSessionChoice ? !session.sending : canSend
 
   const submit = async (): Promise<void> => {
-    if (!canSend || !draft.trim()) {
+    if (!canSubmit || !draft.trim()) {
       return
     }
     // Frozen here: navigating while the request is in flight does not change what was sent.
@@ -85,8 +116,12 @@ export function TriviumComposer({
       describeTriviumItemForAgent(model, itemId, loadState),
       draft
     )
-    const agent = session.target?.title ?? ''
     setSentTo(null)
+    if (newSessionChoice) {
+      await launch(newSessionChoice, prompt)
+      return
+    }
+    const agent = session.target?.title ?? ''
     await send(prompt)
     const after = useTriviumSessionState.getState().sessions[sessionKey]
     if (after && !after.sending && !after.error && after.draft === '') {
@@ -96,13 +131,12 @@ export function TriviumComposer({
 
   const note = session.error ? (
     <span className="text-destructive">{session.error}</span>
+  ) : session.notice ? (
+    session.notice
   ) : sentTo !== null && !draft ? (
     translate('trivium.composer.sent', 'Sent to {{agent}}', { agent: sentTo })
-  ) : targets.length === 0 ? (
-    translate(
-      'trivium.composer.noAgent',
-      'Start an agent session in this workspace to send requests from here.'
-    )
+  ) : newSessionChoice ? (
+    ''
   ) : (
     (disabledReason ?? '')
   )
@@ -156,7 +190,7 @@ export function TriviumComposer({
                   )
                 : translate('trivium.composer.placeholderGoal', 'Ask the agent about this goal…')
             }
-            onChange={(event) => update({ draft: event.target.value, error: null })}
+            onChange={(event) => update({ draft: event.target.value, error: null, notice: null })}
             onKeyDown={(event) => {
               if (imeEnterGesture.ownsKeyDown(event) || isImeOwnedKeyboardEvent(event)) {
                 return
@@ -187,7 +221,7 @@ export function TriviumComposer({
                   size="xs"
                   disabled={session.sending}
                   onClick={() => {
-                    update({ draft: chip, error: null })
+                    update({ draft: chip, error: null, notice: null })
                     inputRef.current?.focus()
                   }}
                 >
@@ -198,8 +232,17 @@ export function TriviumComposer({
             <div className="ml-auto flex items-center gap-1.5">
               <Select
                 value={selectedKey}
-                onValueChange={selectTarget}
-                disabled={session.sending || targets.length === 0}
+                onValueChange={(key) => {
+                  const option = findTriviumNewSessionAgent(newSessionGroup, key)
+                  if (option) {
+                    selectNewSession(option.agent)
+                  } else {
+                    selectTarget(key)
+                  }
+                }}
+                disabled={
+                  session.sending || (targets.length === 0 && newSessionGroup.state !== 'ready')
+                }
               >
                 <SelectTrigger
                   size="sm"
@@ -211,27 +254,49 @@ export function TriviumComposer({
                   />
                 </SelectTrigger>
                 <SelectContent>
-                  {selectedKey &&
-                  !targets.some((target) => triviumSessionTargetKey(target) === selectedKey) ? (
+                  {!newSessionChoice &&
+                  selectedKey &&
+                  !items.sessions.some((item) => item.key === selectedKey) ? (
                     <SelectItem value={selectedKey} disabled>
                       {session.target?.title}
                     </SelectItem>
                   ) : null}
-                  {targets.map((target) => (
-                    <SelectItem
-                      key={triviumSessionTargetKey(target)}
-                      value={triviumSessionTargetKey(target)}
-                    >
-                      {target.tabTitle}
+                  {items.sessions.map((item) => (
+                    <SelectItem key={item.key} value={item.key}>
+                      {item.label}
                     </SelectItem>
                   ))}
+                  {items.sessions.length > 0 ? <SelectSeparator /> : null}
+                  <SelectGroup>
+                    <SelectLabel>
+                      {translate('trivium.composer.newSessionGroup', 'New session')}
+                    </SelectLabel>
+                    {items.newSession.map((item) =>
+                      item.kind === 'agent' ? (
+                        <SelectItem key={item.key} value={item.key}>
+                          <AgentIcon agent={item.agent} size={14} />
+                          <span className="truncate">
+                            {translate('trivium.composer.newSession', 'New {{agent}} session', {
+                              agent: item.label
+                            })}
+                          </span>
+                        </SelectItem>
+                      ) : (
+                        <SelectItem key={item.key} value={item.key} disabled>
+                          {item.kind === 'detecting'
+                            ? translate('trivium.composer.detectingAgents', 'Detecting agents…')
+                            : translate('trivium.composer.noAgentsDetected', 'No agents detected')}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <Button
                 size="sm"
                 className="w-16"
                 aria-busy={session.sending}
-                disabled={!canSend || !draft.trim()}
+                disabled={!canSubmit || !draft.trim()}
                 onClick={() => void submit()}
               >
                 {showSending ? (
