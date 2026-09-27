@@ -32,6 +32,33 @@ export type GenerationFileSystem = {
   /** Renames a directory. The destination must not exist: expo moves a directory *into* an existing
    *  destination rather than over it. */
   moveDirectory(fromUri: string, toUri: string): Promise<void>
+  /**
+   * Renames a file over the destination, which may already exist.
+   *
+   * Not an atomic replace, because expo exposes none: `FileManager.moveItem` and Kotlin's
+   * `moveTo` both refuse a destination that exists, so the adapter deletes it first. A failure
+   * therefore leaves either the old file or none — never a half-written one, which is what the
+   * store needs, since a manifest that cannot be parsed and one that is absent both read back as
+   * "no activation" and redownload.
+   */
+  moveFile(fromUri: string, toUri: string): Promise<void>
+}
+
+const FILE_URI_PREFIX = 'file://'
+
+/**
+ * The `file://` uri the store works in, as the absolute path the native shell view requires.
+ *
+ * The two sides speak different dialects of the same location: `expo-file-system` hands out uris,
+ * and both native loaders refuse anything that does not start with `/`. Percent-decoded because a
+ * uri escapes what a path spells literally, and left alone when it is already a path so a caller
+ * cannot double-decode one.
+ */
+export function generationDirectoryPath(uri: string): string {
+  if (!uri.startsWith(FILE_URI_PREFIX)) {
+    return uri
+  }
+  return decodeURIComponent(uri.slice(FILE_URI_PREFIX.length))
 }
 
 export function createExpoGenerationFileSystem(): GenerationFileSystem {
@@ -81,6 +108,13 @@ export function createExpoGenerationFileSystem(): GenerationFileSystem {
     },
     async moveDirectory(fromUri, toUri) {
       new Directory(fromUri).move(new Directory(toUri))
+    },
+    async moveFile(fromUri, toUri) {
+      const destination = new File(toUri)
+      if (destination.exists) {
+        destination.delete()
+      }
+      new File(fromUri).move(destination)
     }
   }
 }
