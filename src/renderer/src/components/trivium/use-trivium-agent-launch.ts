@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useAgentDetectionTargetForWorktree } from '@/hooks/useAgentDetectionTarget'
 import { useDetectedAgents } from '@/hooks/useDetectedAgents'
 import { translate } from '@/i18n/i18n'
+import { newAgentLaunchRequestId } from '@/lib/agent-launch-request-id'
 import { launchAgentInNewTab, type LaunchAgentInNewTabResult } from '@/lib/launch-agent-in-new-tab'
 import { useAppStore } from '@/store'
 import { DEFAULT_DISABLED_TUI_AGENTS } from '../../../../shared/tui-agent-selection'
@@ -102,6 +103,7 @@ export function useTriviumAgentLaunch(
     try {
       const groupId = useAppStore.getState().activeGroupIdByWorktree[workspaceId]
       result = launchAgentInNewTab({
+        requestId: newAgentLaunchRequestId(),
         agent: option.agent,
         worktreeId: workspaceId,
         ...(groupId ? { groupId } : {}),

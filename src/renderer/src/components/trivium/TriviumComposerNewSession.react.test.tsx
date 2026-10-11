@@ -60,6 +60,15 @@ vi.mock('@/lib/launch-agent-in-new-tab', async (importOriginal) => {
   return { ...actual, launchAgentInNewTab: launcher.launch }
 })
 
+// Stands in for the host: a launch that carries a prompt starts its agent through `agent.launchReplay`.
+const hostRpc = vi.hoisted(() =>
+  vi.fn<(target: unknown, method: string, params: Record<string, unknown>) => Promise<unknown>>()
+)
+vi.mock('@/runtime/runtime-rpc-client', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  callRuntimeRpc: hostRpc
+}))
+
 // Stands in for the PTY: the real launch pastes the prompt once the agent is ready.
 const paste = vi.hoisted(() => vi.fn())
 vi.mock('@/lib/agent-paste-draft', async (importOriginal) => ({
@@ -214,7 +223,8 @@ describe('composer without an agent session', () => {
       worktreeId: PAGE_WORKTREE_ID,
       groupId: 'group-main',
       prompt: expect.stringMatching(/Request:\nPlan this goal$/),
-      promptDelivery: 'submit-after-ready'
+      promptDelivery: 'submit-after-ready',
+      requestId: expect.any(String)
     })
     expect(args.prompt).toContain(`ID: ${G2}`)
     expect(send).not.toHaveBeenCalled()
@@ -435,6 +445,11 @@ describe('composer launch with the real store', () => {
     launcher.launch.mockImplementation(
       (args: LaunchAgentInNewTabArgs) => launcher.actual?.(args) ?? null
     )
+    hostRpc.mockReset().mockImplementation(async (_target, _method, params) => ({
+      outcome: { kind: 'terminal', handle: 'term_1', paneKey: String(params.paneKey) },
+      worktreeId: String(params.worktreeId ?? ''),
+      receipt: { mode: 'terminal', preferred: 'terminal', reason: 'user_default', detail: 'x' }
+    }))
     detection.ids = ['claude']
   })
 

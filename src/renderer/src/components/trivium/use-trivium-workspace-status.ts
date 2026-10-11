@@ -9,9 +9,8 @@ import {
   getRuntimeEnvironmentIdForWorktree
 } from '@/lib/worktree-runtime-owner'
 import {
-  getActiveRuntimeTarget,
   runtimeTargetForExecutionHostId,
-  settingsForRuntimeOwner,
+  runtimeTargetForOwnerEnvironment,
   type RuntimeClientTarget
 } from '@/runtime/runtime-client-target'
 import { subscribeRuntimeFileChanges } from '@/runtime/runtime-file-watch-client'
@@ -182,7 +181,6 @@ export function useTriviumWorkspaceStatus(
   workspacePath: string | null,
   connectionId: string | null | undefined
 ): TriviumWorkspaceStatusResult {
-  const settings = useAppStore((state) => state.settings)
   const executionHostId = useAppStore((state) => getExecutionHostIdForWorktree(state, workspaceId))
   const runtimeOwnerEnvironmentId = useAppStore((state) =>
     getRuntimeEnvironmentIdForWorktree(state, workspaceId)
@@ -191,9 +189,9 @@ export function useTriviumWorkspaceStatus(
   // Why: the watch must follow the host that OWNS this workspace, not the globally focused
   // runtime — otherwise a remote workspace never sees its events and a local one under an
   // active environment starts no local watcher (useEditorExternalWatch does the same).
-  const watchSettings = useMemo(
-    () => settingsForRuntimeOwner(settings, runtimeOwnerEnvironmentId),
-    [runtimeOwnerEnvironmentId, settings]
+  const watchTarget = useMemo(
+    () => runtimeTargetForOwnerEnvironment(runtimeOwnerEnvironmentId),
+    [runtimeOwnerEnvironmentId]
   )
   const identity = statusIdentity(executionHostId, workspaceId)
   const [state, setState] = useState<IdentifiedStatusState>(() => ({
@@ -270,7 +268,7 @@ export function useTriviumWorkspaceStatus(
     // Why: subscribeRuntimeFileChanges only starts a watcher on an environment target; on the
     // local path it just attaches a listener, and nothing else watches while this full-page
     // view is up (the Explorer is suppressed here). So own the watch on that path.
-    const startsOwnWatch = getActiveRuntimeTarget(watchSettings).kind === 'environment'
+    const startsOwnWatch = watchTarget.kind === 'environment'
     const ownsLocalWatch = !startsOwnWatch && connectionId !== undefined
     const localWatchArgs = { worktreePath: workspacePath, connectionId: connectionId ?? undefined }
     if (ownsLocalWatch) {
@@ -291,7 +289,7 @@ export function useTriviumWorkspaceStatus(
     }
     void subscribeRuntimeFileChanges(
       {
-        settings: watchSettings,
+        target: watchTarget,
         worktreeId: workspaceId,
         worktreePath: workspacePath,
         connectionId: connectionId ?? undefined
@@ -326,7 +324,7 @@ export function useTriviumWorkspaceStatus(
         void window.api.fs.unwatchWorktree(localWatchArgs)
       }
     }
-  }, [connectionId, load, watchSettings, workspaceId, workspacePath])
+  }, [connectionId, load, watchTarget, workspaceId, workspacePath])
 
   // Why: derived, not set from an effect — a workspace or host switch renders loading on the
   // same commit as the new props, instead of one frame of the previous workspace's verdict.

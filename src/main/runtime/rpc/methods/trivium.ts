@@ -61,6 +61,7 @@ async function readTriviumWorkspace(
 export const TRIVIUM_METHODS = [
   defineMethod({
     name: 'trivium.availability',
+    permission: 'workspace',
     params: null,
     // Why ping rather than a bare PATH lookup: an installed trivium whose
     // service refuses to start is not available, and the reason differs.
@@ -90,12 +91,14 @@ export const TRIVIUM_METHODS = [
   }),
   defineMethod({
     name: 'trivium.status',
+    permission: 'workspace',
     params: WorktreeSelector,
     handler: (params, { runtime }) =>
       readTriviumWorkspace(runtime, params.worktree, 'workspace.status')
   }),
   defineMethod({
     name: 'trivium.progress',
+    permission: 'workspace',
     params: TriviumProgress,
     handler: (params, { runtime }) =>
       readTriviumWorkspace(runtime, params.worktree, 'workspace.progress', {
@@ -105,12 +108,14 @@ export const TRIVIUM_METHODS = [
   }),
   defineMethod({
     name: 'trivium.goals',
+    permission: 'workspace',
     params: WorktreeSelector,
     handler: (params, { runtime }) =>
       readTriviumWorkspace(runtime, params.worktree, 'workspace.goals')
   }),
   defineMethod({
     name: 'trivium.tickets',
+    permission: 'workspace',
     params: TriviumTickets,
     handler: (params, { runtime }) =>
       readTriviumWorkspace(runtime, params.worktree, 'workspace.tickets', {

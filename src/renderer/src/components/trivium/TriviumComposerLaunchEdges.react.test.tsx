@@ -186,6 +186,7 @@ describe('launch arguments', () => {
       'groupId',
       'prompt',
       'promptDelivery',
+      'requestId',
       'worktreeId'
     ])
   })

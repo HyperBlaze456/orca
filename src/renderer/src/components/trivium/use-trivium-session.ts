@@ -20,6 +20,7 @@ export function useTriviumSession(workspaceId: string, sessionKey: string) {
   const update = useTriviumSessionState((s) => s.update)
   const agentStatusByPaneKey = useAppStore((s) => s.agentStatusByPaneKey)
   const tabsByWorktree = useAppStore((s) => s.tabsByWorktree)
+  const unifiedTabsByWorktree = useAppStore((s) => s.unifiedTabsByWorktree)
   const terminalLayoutsByTabId = useAppStore((s) => s.terminalLayoutsByTabId)
   const ptyIdsByTabId = useAppStore(useShallow((s) => selectLivePtyIdsForWorktree(s, workspaceId)))
   const runtimePaneTitlesByTabId = useAppStore((s) => s.runtimePaneTitlesByTabId)
@@ -30,18 +31,25 @@ export function useTriviumSession(workspaceId: string, sessionKey: string) {
       {
         agentStatusByPaneKey,
         tabsByWorktree,
+        unifiedTabsByWorktree,
         terminalLayoutsByTabId,
         ptyIdsByTabId,
         runtimePaneTitlesByTabId
       },
       workspaceId
     ).flatMap((target) => {
-      const ptyId = terminalLayoutsByTabId[target.tabId]?.ptyIdsByLeafId?.[target.leafId]
-      return ptyId ? [{ ...target, ptyId }] : []
+      // Why terminal only: the composer pins and previews a PTY, and a structured chat has none.
+      if (target.messageTarget.kind !== 'terminal') {
+        return []
+      }
+      const { leafId } = target.messageTarget
+      const ptyId = terminalLayoutsByTabId[target.tabId]?.ptyIdsByLeafId?.[leafId]
+      return ptyId ? [{ ...target, leafId, ptyId }] : []
     })
   }, [
     agentStatusByPaneKey,
     tabsByWorktree,
+    unifiedTabsByWorktree,
     terminalLayoutsByTabId,
     ptyIdsByTabId,
     runtimePaneTitlesByTabId,

@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events'
 import { PassThrough } from 'node:stream'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { spawnProcess } from '../../shared/child-process/run-process'
+import type { spawnProcess } from '@orca/process-host'
 import {
   TRIVIUM_SERVICE_MAX_LINE_BYTES,
   openTriviumServiceConnection,
@@ -14,7 +14,7 @@ const { signalProcessTree, forceTerminateProcessTree } = vi.hoisted(() => ({
   forceTerminateProcessTree: vi.fn(async () => true)
 }))
 
-vi.mock('../../shared/child-process/process-tree-termination', () => ({
+vi.mock('@orca/process-host/process-tree-termination', () => ({
   signalProcessTree,
   forceTerminateProcessTree
 }))
