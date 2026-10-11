@@ -5,11 +5,13 @@
  * fixture (repo HEAD payloads, then the installed 0.15 binary's), so the spec drives the real
  * renderer: a second visit's change markers, Overview, a Goal chosen in the tree, a ticket and
  * its pager, All tickets with a Display change, back to the Overview, workspace details, a lost
- * host (stale notice), and a workspace without a harness. Every window stays hidden;
- * screenshots come from CDP.
+ * host (stale notice), and a workspace without a harness. A second case opens the page's
+ * terminal panel: a real shell at the workspace root, and "Paste into terminal" on a proposed
+ * ticket. Every window stays hidden; screenshots come from CDP.
  */
 
-import type { ElectronApplication, Page, TestInfo } from '@stablyai/playwright-test'
+import { realpathSync } from 'node:fs'
+import type { ElectronApplication, Locator, Page, TestInfo } from '@stablyai/playwright-test'
 import type { TriviumWorkspaceStatus } from '../../src/shared/trivium-workspace-status'
 import { test, expect } from './helpers/orca-app'
 import { waitForSessionReady } from './helpers/store'
@@ -21,6 +23,7 @@ import { makeTriviumModelProgress } from '../../src/renderer/src/components/triv
 import {
   FIXTURE_GOALS,
   G2,
+  fixtureApproveCommand,
   type TriviumFixtureBinary
 } from '../../src/renderer/src/components/trivium/trivium-model-tables.fixture'
 
@@ -312,3 +315,153 @@ for (const binary of ['head', 'installed'] as const) {
     await expectEveryWindowHidden(electronApp)
   })
 }
+
+/** The panel shell's screen and scrollback as plain lines, read from its xterm buffer. */
+async function panelTerminalLines(page: Page, tabId: string): Promise<string[]> {
+  return page.evaluate((id) => {
+    const manager = window.__paneManagers?.get(id)
+    const pane = manager?.getActivePane?.() ?? manager?.getPanes?.()[0]
+    const buffer = pane?.terminal.buffer.active
+    if (!buffer) {
+      return []
+    }
+    const lines: string[] = []
+    for (let row = 0; row < buffer.length; row += 1) {
+      lines.push(buffer.getLine(row)?.translateToString(true).trim() ?? '')
+    }
+    return lines
+  }, tabId)
+}
+
+async function expectPanelLine(
+  page: Page,
+  tabId: string,
+  matches: (line: string) => boolean,
+  message: string
+): Promise<void> {
+  await expect
+    .poll(async () => (await panelTerminalLines(page, tabId)).some(matches), {
+      timeout: 20_000,
+      message
+    })
+    .toBe(true)
+}
+
+/** Opens the panel from the header; returns the shell's tab id once its PTY is live. */
+async function openTerminalPanel(page: Page): Promise<{ panel: Locator; tabId: string }> {
+  const toggle = page.locator('[data-trivium-header]').getByRole('button', { name: 'Terminal' })
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  const panel = page.locator('[data-trivium-terminal-panel]')
+  await expect(panel).toBeVisible()
+  await expect(panel.locator('[data-pty-id]')).toHaveCount(1, { timeout: 30_000 })
+  const tabId = await panel
+    .locator('[data-terminal-tab-id]')
+    .first()
+    .getAttribute('data-terminal-tab-id')
+  if (!tabId) {
+    throw new Error('The panel terminal has no tab id')
+  }
+  return { panel, tabId }
+}
+
+test('runs a plain shell in the Trivium page terminal panel with every window hidden', async ({
+  electronApp,
+  orcaPage
+}, testInfo) => {
+  test.setTimeout(180_000)
+  await waitForSessionReady(orcaPage)
+  await expectEveryWindowHidden(electronApp)
+  await serveTriviumFixture(electronApp, runtimeFixture('head'))
+  await setScenario(electronApp, 'online')
+  await orcaPage.setViewportSize({ width: 1440, height: 900 })
+  await openTriviumPage(orcaPage)
+  await expect(orcaPage.getByRole('tree', { name: 'Goals and tickets' })).toBeVisible()
+
+  const { panel, tabId } = await openTerminalPanel(orcaPage)
+  // One pane for the shell: no second copy in a hidden workbench or a workspace tab strip. The
+  // pane's own chromeless title overlay also carries the tab id, so it is left out of the count.
+  const tabElements = orcaPage.locator(`[data-terminal-tab-id="${tabId}"]`)
+  await expect(tabElements.and(orcaPage.locator(':not(.pane-title-bar)'))).toHaveCount(1)
+  await expect(tabElements).toHaveCount(
+    await panel.locator(`[data-terminal-tab-id="${tabId}"]`).count()
+  )
+  const tabOwner = await orcaPage.evaluate((id) => {
+    const tabsByWorktree = window.__store?.getState().tabsByWorktree ?? {}
+    return Object.entries(tabsByWorktree)
+      .filter(([, tabs]) => tabs.some((tab) => tab.id === id))
+      .map(([worktreeId]) => worktreeId)
+  }, tabId)
+  const workspacePath = (await panel.locator('[data-trivium-terminal-cwd]').textContent()) ?? ''
+  expect(workspacePath).not.toBe('')
+  // Owned by the branded setup-terminal id only, never by a workspace.
+  expect(tabOwner).toEqual([`ephemeral-setup-terminal:trivium-terminal::${workspacePath}`])
+  await expectPanelLine(orcaPage, tabId, (line) => line.length > 0, 'The shell drew no prompt')
+  await panel.locator('.xterm').first().click()
+  await orcaPage.keyboard.type('echo trivium-panel-ok', { delay: 15 })
+  await orcaPage.keyboard.press('Enter')
+  await expectPanelLine(
+    orcaPage,
+    tabId,
+    (line) => line === 'trivium-panel-ok',
+    'echo did not run in the panel shell'
+  )
+
+  const reader = orcaPage.locator('[data-trivium-reader]')
+  await orcaPage
+    .getByRole('navigation', { name: 'Trivium views' })
+    .getByRole('button', { name: /^All tickets/ })
+    .click()
+  await reader.locator(`[data-trivium-ticket-row="${CANDIDATE_TICKET}"]`).click()
+  const callout = reader.locator(
+    `[data-trivium-page="ticket"][data-trivium-item="${CANDIDATE_TICKET}"] [data-trivium-approval]`
+  )
+  await expect(callout).toBeVisible()
+  await expect(callout.getByRole('button')).toHaveText([
+    'Paste into terminal',
+    'Ask the agent to approve',
+    'Copy command'
+  ])
+  await expect(callout.locator('[data-trivium-approve-placeholders]')).toHaveText(
+    'Replace <user> before you press Enter.'
+  )
+  const command = fixtureApproveCommand(CANDIDATE_TICKET)
+  await callout.getByRole('button', { name: 'Paste into terminal' }).click()
+  await expectPanelLine(
+    orcaPage,
+    tabId,
+    (line) => line.endsWith(command),
+    'The approve command was not pasted into the panel shell'
+  )
+  await expect(orcaPage.getByText('Workspace board moved to the bottom bar')).toHaveCount(0, {
+    timeout: 20_000
+  })
+  await capture(orcaPage, testInfo, 'head-terminal-ticket')
+
+  // Hiding keeps the same shell; opening again shows it, with no second shell.
+  await panel.getByRole('button', { name: 'Hide terminal' }).click()
+  await expect(panel).toBeHidden()
+  await expect(orcaPage.locator(`[data-terminal-tab-id="${tabId}"] [data-pty-id]`)).toHaveCount(1)
+  await expectEveryWindowHidden(electronApp)
+  await orcaPage.locator('[data-trivium-header]').getByRole('button', { name: 'Terminal' }).click()
+  await expect(panel).toBeVisible()
+  await expect(panel.locator('[data-terminal-tab-id]').first()).toHaveAttribute(
+    'data-terminal-tab-id',
+    tabId
+  )
+
+  // The shell started at the workspace root (the pasted command is cleared first).
+  await panel.locator('.xterm').first().click()
+  await orcaPage.keyboard.press('Control+U')
+  await orcaPage.keyboard.type('pwd -P', { delay: 15 })
+  await orcaPage.keyboard.press('Enter')
+  const realWorkspacePath = realpathSync(workspacePath)
+  await expectPanelLine(
+    orcaPage,
+    tabId,
+    (line) => line === realWorkspacePath,
+    `The panel shell did not start in ${realWorkspacePath}`
+  )
+  await expectEveryWindowHidden(electronApp)
+})

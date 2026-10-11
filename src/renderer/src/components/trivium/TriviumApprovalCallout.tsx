@@ -2,13 +2,17 @@ import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { triviumApprovalRequest } from './trivium-composer-prompt'
 import type { TriviumModel } from './trivium-goal-model'
+import { triviumCommandPlaceholders } from './trivium-terminal-command-insert'
+import { useTriviumTerminalControls } from './trivium-terminal-panel-state'
 import { TriviumTicketStatusIcon } from './TriviumIcons'
 import { TriviumReaderCopyButton } from './TriviumReaderButtons'
 import { TriviumRichText } from './TriviumRichText'
+import { TriviumPasteIntoTerminalButton } from './TriviumTerminalButtons'
 
 /**
- * A proposed ticket waits for the user. The page never approves: "Ask the agent to approve"
- * only writes the request into the composer, and the user still presses Send.
+ * A proposed ticket waits for the user. The page never approves: "Paste into terminal" puts the
+ * command in the page's shell without Enter, "Ask the agent to approve" only writes the request
+ * into the composer, and the user still presses Enter or Send.
  */
 export function TriviumApprovalCallout({
   model,
@@ -22,6 +26,8 @@ export function TriviumApprovalCallout({
   const parent = model.parent(id)
   const hypothesis = model.proposal(id)?.hypothesis ?? ''
   const command = model.approveCommand(id)
+  const placeholders = command ? triviumCommandPlaceholders(command) : []
+  const { timedOutText } = useTriviumTerminalControls()
   return (
     <div
       data-trivium-approval=""
@@ -59,8 +65,22 @@ export function TriviumApprovalCallout({
           {command}
         </code>
       ) : null}
+      {placeholders.length > 0 ? (
+        <p data-trivium-approve-placeholders="" className="mt-1.5 text-xs text-muted-foreground">
+          {translate(
+            'trivium.approval.placeholderHint',
+            'Replace {{placeholders}} before you press Enter.',
+            { placeholders: placeholders.join(', ') }
+          )}
+        </p>
+      ) : null}
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <Button size="xs" onClick={() => onAskAgent(triviumApprovalRequest(model, id))}>
+        {command ? <TriviumPasteIntoTerminalButton command={command} /> : null}
+        <Button
+          size="xs"
+          variant={command ? 'outline' : 'default'}
+          onClick={() => onAskAgent(triviumApprovalRequest(model, id))}
+        >
           {translate('trivium.approval.ask', 'Ask the agent to approve')}
         </Button>
         {command ? (
@@ -70,6 +90,14 @@ export function TriviumApprovalCallout({
           />
         ) : null}
       </div>
+      {command && timedOutText === command ? (
+        <p role="status" className="mt-2 text-xs text-muted-foreground">
+          {translate(
+            'trivium.approval.pasteTimeout',
+            "The terminal didn't start in time. Try again, or copy the command."
+          )}
+        </p>
+      ) : null}
     </div>
   )
 }

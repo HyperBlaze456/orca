@@ -18636,7 +18636,10 @@
       "explain": "Approving adopts this proposed ticket. Until then it is not part of the Goal model.",
       "why": "Why it was proposed.",
       "ask": "Ask the agent to approve",
-      "copyCommand": "Copy command"
+      "copyCommand": "Copy command",
+      "placeholderHint": "Replace {{placeholders}} before you press Enter.",
+      "pasteTimeout": "The terminal didn't start in time. Try again, or copy the command.",
+      "paste": "Paste into terminal"
     },
     "criteria": {
       "met": "Met",
@@ -18816,6 +18819,17 @@
       "goalDraft": "Goal draft to review",
       "noAdoptedGoal": "No Goal adopted",
       "noHarness": "Not set up in this workspace"
+    },
+    "terminal": {
+      "title": "Terminal",
+      "hide": "Hide terminal",
+      "tabTitle": "Trivium terminal",
+      "exited": "The shell exited.",
+      "restart": "Start a new shell",
+      "resize": "Resize the terminal",
+      "noWorkspace": "Open a workspace to use the terminal.",
+      "remoteRuntime": "The terminal is unavailable while a remote runtime is active.",
+      "localOnly": "The terminal is available for local workspaces only."
     }
   }
 }

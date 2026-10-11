@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, within } from '@testing-library/react'
+import { cleanup, fireEvent, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { TriviumWorkspaceState } from '../../../../shared/trivium-workspace-status'
 import { renderWithTooltips, requireElement } from './trivium-reader-test-harness'
-import { TriviumHeader } from './TriviumHeader'
+import { TriviumHeader, type TriviumHeaderTerminal } from './TriviumHeader'
 
 const PHRASES: [TriviumWorkspaceState, string][] = [
   ['review', 'Milestone ready for review'],
@@ -17,10 +17,17 @@ const PHRASES: [TriviumWorkspaceState, string][] = [
   ['no-harness', 'Not set up in this workspace']
 ]
 
+const LOCAL_TERMINAL: TriviumHeaderTerminal = {
+  open: false,
+  availability: { available: true },
+  onToggle: () => {}
+}
+
 function renderHeader(
   state: TriviumWorkspaceState | null,
   since: number | null | undefined,
-  onRefresh = vi.fn()
+  onRefresh = vi.fn(),
+  terminal: TriviumHeaderTerminal = LOCAL_TERMINAL
 ): HTMLElement {
   renderWithTooltips(
     <TriviumHeader
@@ -28,6 +35,7 @@ function renderHeader(
       stale={since === undefined ? null : { since }}
       frame={null}
       onRefresh={onRefresh}
+      terminal={terminal}
     />
   )
   return requireElement(document.querySelector('[data-trivium-header]'))
@@ -68,5 +76,43 @@ describe('TriviumHeader', () => {
   it('still says the data is stale when its arrival time is unknown', () => {
     const header = renderHeader('active', null)
     expect(header).toHaveTextContent("Can't reach Trivium. Showing the last data received.")
+  })
+
+  it('toggles the terminal next to Refresh and says what the next click does', async () => {
+    const onToggle = vi.fn()
+    const header = renderHeader('active', undefined, vi.fn(), { ...LOCAL_TERMINAL, onToggle })
+    const toggle = within(header).getByRole('button', { name: 'Terminal' })
+    expect(toggle).toHaveAttribute('aria-pressed', 'false')
+    expect(toggle).toBeEnabled()
+    expect(toggle.nextElementSibling).toBe(within(header).getByRole('button', { name: 'Refresh' }))
+    fireEvent.focus(toggle)
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Terminal')
+    fireEvent.click(toggle)
+    expect(onToggle).toHaveBeenCalledTimes(1)
+  })
+
+  it('offers to hide an open terminal', async () => {
+    const header = renderHeader('active', undefined, vi.fn(), { ...LOCAL_TERMINAL, open: true })
+    const toggle = within(header).getByRole('button', { name: 'Terminal' })
+    expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.focus(toggle)
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Hide terminal')
+  })
+
+  it('disables the terminal away from this computer and says why', async () => {
+    const onToggle = vi.fn()
+    const header = renderHeader('active', undefined, vi.fn(), {
+      open: false,
+      availability: { available: false, reason: 'not-local' },
+      onToggle
+    })
+    const toggle = within(header).getByRole('button', { name: 'Terminal' })
+    expect(toggle).toBeDisabled()
+    fireEvent.click(toggle)
+    expect(onToggle).not.toHaveBeenCalled()
+    fireEvent.focus(requireElement(toggle.parentElement))
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'The terminal is available for local workspaces only.'
+    )
   })
 })

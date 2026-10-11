@@ -10,11 +10,19 @@ import { triviumStatePhrase } from './trivium-status-display'
 import { TriviumChangesPopover } from './TriviumChangesPopover'
 import { TriviumMilestoneDiamond } from './TriviumIcons'
 import { TriviumInfoPopover } from './TriviumInfoPopover'
+import type { TriviumTerminalAvailability } from './trivium-terminal-panel-state'
+import { TriviumTerminalToggle } from './TriviumTerminalButtons'
 
 export type TriviumHeaderFrame = Pick<
   TriviumPageFrame,
   'model' | 'entries' | 'changes' | 'navigation' | 'loadState'
 >
+
+export type TriviumHeaderTerminal = {
+  open: boolean
+  availability: TriviumTerminalAvailability
+  onToggle: () => void
+}
 
 function TriviumHeaderState({ state }: { state: TriviumWorkspaceState }): React.JSX.Element {
   return (
@@ -62,19 +70,22 @@ function TriviumHeaderStale({
 
 /**
  * The page's one 48px band: title, the workspace state in words, then freshness, the changes
- * chip, workspace details and Refresh. No back button: the sidebar leaves the page.
+ * chip, workspace details, the terminal toggle and Refresh. No back button: the sidebar leaves
+ * the page.
  */
 export function TriviumHeader({
   state,
   stale,
   frame,
-  onRefresh
+  onRefresh,
+  terminal
 }: {
   state: TriviumWorkspaceState | null
   stale: TriviumStaleNotice | null
   /** The model's controls (changes, details) once a harness answered. */
   frame: TriviumHeaderFrame | null
   onRefresh: () => void
+  terminal: TriviumHeaderTerminal
 }): React.JSX.Element {
   const refreshLabel = translate('trivium.header.refresh', 'Refresh')
   const refreshButton = useRef<HTMLButtonElement>(null)
@@ -100,6 +111,11 @@ export function TriviumHeader({
           />
         ) : null}
         {frame ? <TriviumInfoPopover model={frame.model} /> : null}
+        <TriviumTerminalToggle
+          open={terminal.open}
+          availability={terminal.availability}
+          onToggle={terminal.onToggle}
+        />
         <Tooltip>
           <TooltipTrigger asChild>
             <Button

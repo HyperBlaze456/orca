@@ -15,6 +15,11 @@ import {
   TriviumUnsupportedScreen
 } from './TriviumStateScreens'
 import { TriviumStructurePane } from './TriviumStructurePane'
+import { TriviumTerminalPanel } from './TriviumTerminalPanel'
+import {
+  TriviumTerminalControlsContext,
+  useTriviumTerminalPanel
+} from './trivium-terminal-panel-state'
 import {
   useTriviumActiveWorkspace,
   type TriviumActiveWorkspace
@@ -117,8 +122,8 @@ function useTriviumPageEscape(close: () => void): void {
 
 /**
  * Full-page Track A harness state for the active workspace (git worktree or folder): one header
- * band, then the Goal structure beside the reader. Everything is read-only; changes go through
- * an agent session.
+ * band, then the Goal structure beside the reader, and an optional terminal panel below them.
+ * The page itself is read-only; changes go through an agent session or the user's own shell.
  */
 export default function TriviumPage(): React.JSX.Element {
   const closeTriviumPage = useAppStore((state) => state.closeTriviumPage)
@@ -131,17 +136,39 @@ export default function TriviumPage(): React.JSX.Element {
     workspace?.path
   ])
   const page = useTriviumPageData(workspace)
+  const terminal = useTriviumTerminalPanel(workspace)
   useTriviumPageEscape(closeTriviumPage)
 
   return (
-    <div className="flex h-full min-h-0 flex-col bg-background">
-      <TriviumHeader
-        state={workspace ? (page.status.data?.state ?? null) : null}
-        stale={workspace ? page.stale : null}
-        frame={page.frame}
-        onRefresh={page.refresh}
-      />
-      <TriviumPageBody workspace={workspace} page={page} sessionKey={sessionKey} />
-    </div>
+    <TriviumTerminalControlsContext.Provider value={terminal.controls}>
+      <div className="flex h-full min-h-0 flex-col bg-background">
+        <TriviumHeader
+          state={workspace ? (page.status.data?.state ?? null) : null}
+          stale={workspace ? page.stale : null}
+          frame={page.frame}
+          onRefresh={page.refresh}
+          terminal={{
+            open: terminal.shown,
+            availability: terminal.availability,
+            onToggle: terminal.toggle
+          }}
+        />
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex min-h-0 flex-1 flex-col">
+            <TriviumPageBody workspace={workspace} page={page} sessionKey={sessionKey} />
+          </div>
+          {terminal.mounted && workspace ? (
+            <TriviumTerminalPanel
+              key={terminal.workspaceKey}
+              cwd={workspace.path}
+              open={terminal.shown}
+              onHide={terminal.hide}
+              pasteRequest={terminal.pasteRequest}
+              onPasteSettled={terminal.settlePaste}
+            />
+          ) : null}
+        </div>
+      </div>
+    </TriviumTerminalControlsContext.Provider>
   )
 }
