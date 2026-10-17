@@ -1,4 +1,4 @@
-import type { RuntimeClientTarget } from './runtime-client-target'
+import type { RuntimeClientTarget } from '../../../shared/runtime-client-target'
 import type { LocalFileAccess } from '../../../shared/local-file-access'
 
 export type RuntimeReadableFileContent = {
@@ -21,6 +21,10 @@ export type RuntimeFileReadArgs = {
   includeLocalLogMetadata?: boolean
   /** File access of the local fallback read; remote reads stay root-relative. */
   access?: LocalFileAccess
+  /** Host grant for a runtime file outside every workspace (see OpenFile.terminalArtifactGrantId). */
+  terminalArtifactGrantId?: string
+  /** Set by readers that render the bytes: page a remote PDF/image too large for one reply. */
+  pageOversizedBinary?: boolean
 }
 
 export type RuntimeFileOperationArgs = {

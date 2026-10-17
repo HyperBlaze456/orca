@@ -1,10 +1,11 @@
 import { resolveOwner } from '@/lib/resolve-owner'
 import type { WorktreeOperationRouteState } from '@/lib/worktree-operation-route'
+import { hostRouteForAuthority, type HostRoute } from '@/runtime/runtime-client-target'
+import type { RuntimeClientTarget } from '../../../../shared/runtime-client-target'
 import {
-  hostRouteForAuthority,
-  type HostRoute,
-  type RuntimeClientTarget
-} from '@/runtime/runtime-client-target'
+  getOrcadSshDeployment,
+  type OrcadDeploymentLink
+} from '../../../../shared/runtime-environments'
 import { isRuntimeOwnedSshTargetId, parseExecutionHostId } from '../../../../shared/execution-host'
 import {
   authorityKey,
@@ -55,4 +56,45 @@ export function portsPanelHostForOwnerKey(key: HostAuthorityKey | null): PortsPa
     return { kind: 'direct-ssh', connectionId: host.targetId }
   }
   return { kind: 'host-scoped', route, executionHostId: authority.at }
+}
+
+/** The Ports tab shows for a workspace on an SSH host, dialed directly or through its managed server. */
+export function portsPanelReachesSshHost(
+  host: PortsPanelHost,
+  environments: readonly { id: string; orcadDeployment?: unknown }[]
+): boolean {
+  switch (host.kind) {
+    case 'direct-ssh':
+    case 'host-scoped':
+      return true
+    case 'endpoint': {
+      const { target } = host
+      return (
+        target.kind === 'environment' &&
+        environments.some(
+          (environment) =>
+            environment.id === target.environmentId && environment.orcadDeployment !== undefined
+        )
+      )
+    }
+    case 'unknown':
+      return false
+  }
+}
+
+/**
+ * The SSH host whose connection carries this client's forwards for a managed server's workspace.
+ * Why: the server scans its own ports, but a forward listens on this machine, so it rides the SSH
+ * connection under the server's tunnel, as it did before the host moved (#29153).
+ */
+export function portsPanelForwardTargetId(
+  host: PortsPanelHost,
+  environments: readonly { id: string; orcadDeployment?: OrcadDeploymentLink }[]
+): string | null {
+  if (host.kind !== 'endpoint' || host.target.kind !== 'environment') {
+    return null
+  }
+  const { environmentId } = host.target
+  const environment = environments.find((candidate) => candidate.id === environmentId)
+  return (environment && getOrcadSshDeployment(environment)?.sshTargetId) || null
 }

@@ -5,7 +5,6 @@ import {
   UNRESOLVED_OWNER_HOST_ID
 } from '../../../shared/execution-host'
 import type { ExecutionHostId } from '../../../shared/execution-host'
-import type { GlobalSettings } from '../../../shared/global-settings-types'
 import type { Worktree } from '../../../shared/worktree/types'
 import { parseWorkspaceKey } from '../../../shared/workspace-scope'
 import { getRepoIdFromWorktreeId } from '@/store/slices/worktree-helpers'
@@ -27,12 +26,10 @@ import {
 import {
   getFloatingWorkspaceOperationRoute,
   resolveActiveWorkspaceRoute,
-  resolveExplicitWorktreeOperationRouteResult,
   resolveWorktreeOperationRouteResult
 } from './worktree-operation-route'
+import { resolveExplicitWorktreeOperationRouteResult } from './worktree-operation-catalog-route'
 import type { WorktreeRuntimeOwnerState } from './worktree-runtime-owner-state'
-export type { WorktreeRuntimeOwnerState } from './worktree-runtime-owner-state'
-export { getRuntimeSessionMirrorEnvironmentIds } from './runtime-session-mirror-owners'
 
 function getExplicitRuntimeEnvironmentIdFromHost(
   executionHostId: string | null | undefined
@@ -62,28 +59,59 @@ function getActiveWorkspaceExecutionHostId(
     : null
 }
 
+export type WorktreeRuntimeOwner =
+  | { kind: 'runtime'; environmentId: string }
+  | { kind: 'non-runtime' }
+  // Why: the same repo id and path is published by two hosts (e.g. mid ssh-to-runtime migration).
+  | { kind: 'ambiguous' }
+
+const NON_RUNTIME_OWNER: WorktreeRuntimeOwner = { kind: 'non-runtime' }
+const AMBIGUOUS_OWNER: WorktreeRuntimeOwner = { kind: 'ambiguous' }
+
+function toRuntimeOwner(environmentId: string | null | undefined): WorktreeRuntimeOwner {
+  return environmentId ? { kind: 'runtime', environmentId } : NON_RUNTIME_OWNER
+}
+
+/**
+ * @deprecated Use `resolveOwner` (`./resolve-owner`), which keeps the host and reports twins as
+ * `ambiguous`. Here ambiguous collapses to `null`, which callers read as local; read-only use only.
+ */
 export function getRuntimeEnvironmentIdForWorktree(
   state: WorktreeRuntimeOwnerState,
   worktreeId: string | null | undefined
 ): string | null {
+  const owner = resolveRuntimeOwnerForWorktree(state, worktreeId)
+  return owner.kind === 'runtime' ? owner.environmentId : null
+}
+
+/**
+ * @deprecated Use `resolveOwner` (`./resolve-owner`). This drops the host, reads local, SSH and
+ * unknown alike as `non-runtime`, and sends folder twins to the focused runtime.
+ */
+export function resolveRuntimeOwnerForWorktree(
+  state: WorktreeRuntimeOwnerState,
+  worktreeId: string | null | undefined
+): WorktreeRuntimeOwner {
   if (!worktreeId) {
-    return null
+    return NON_RUNTIME_OWNER
   }
   const floatingRoute = getFloatingWorkspaceOperationRoute(worktreeId)
   if (floatingRoute) {
-    return floatingRoute.runtimeEnvironmentId
+    return toRuntimeOwner(floatingRoute.runtimeEnvironmentId)
   }
   const activeRoute = resolveActiveWorkspaceRoute(state, worktreeId)
   if (activeRoute) {
-    return activeRoute.runtimeEnvironmentId
+    return toRuntimeOwner(activeRoute.runtimeEnvironmentId)
   }
   const workspaceScope = parseWorkspaceKey(worktreeId)
   if (workspaceScope?.type === 'folder') {
-    return getRuntimeEnvironmentIdForFolderWorkspace(state, workspaceScope.folderWorkspaceId)
+    return toRuntimeOwner(
+      getRuntimeEnvironmentIdForFolderWorkspace(state, workspaceScope.folderWorkspaceId)
+    )
   }
   const indexedOwner = resolveIndexedWorktreeOwner(state.worktreesByRepo, worktreeId)
   if (indexedOwner.kind === 'ambiguous') {
-    return null
+    return AMBIGUOUS_OWNER
   }
   if (indexedOwner.kind === 'resolved') {
     const owner = indexedOwner.owner
@@ -93,15 +121,15 @@ export function getRuntimeEnvironmentIdForWorktree(
     // Why: a row on a web client that names no server is still reached through its only one.
     const onlyHost = getPairedWebClientEnvironmentId(state)
     if (!hasDetectedOwner && (projectedRuntimeOwner || parsedHost)) {
-      return (
+      return toRuntimeOwner(
         projectedRuntimeOwner ||
-        (parsedHost?.kind === 'runtime' ? parsedHost.environmentId : onlyHost)
+          (parsedHost?.kind === 'runtime' ? parsedHost.environmentId : onlyHost)
       )
     }
     if (!hasDetectedOwner) {
       const repoResolution = resolveIndexedRepoOwner(state.repos, owner.repoId)
       if (repoResolution.kind === 'ambiguous') {
-        return null
+        return AMBIGUOUS_OWNER
       }
       if (
         repoResolution.kind === 'resolved' &&
@@ -109,13 +137,18 @@ export function getRuntimeEnvironmentIdForWorktree(
       ) {
         const repoHost = parseExecutionHostId(getRepoExecutionHostId(repoResolution.owner))
         if (repoHost) {
-          return repoHost.kind === 'runtime' ? repoHost.environmentId : onlyHost
+          return toRuntimeOwner(repoHost.kind === 'runtime' ? repoHost.environmentId : onlyHost)
         }
       }
     }
   }
   const resolution = resolveWorktreeOperationRouteResult(state, worktreeId)
-  return resolution.kind === 'resolved' ? resolution.route.runtimeEnvironmentId : null
+  if (resolution.kind === 'ambiguous') {
+    return AMBIGUOUS_OWNER
+  }
+  return resolution.kind === 'resolved'
+    ? toRuntimeOwner(resolution.route.runtimeEnvironmentId)
+    : NON_RUNTIME_OWNER
 }
 
 export function getExplicitRuntimeEnvironmentIdForWorktree(
@@ -248,14 +281,4 @@ export function getExecutionHostIdForWorktree(
     getKnownExecutionHostIdForWorktree(state, worktreeId) ??
     getFocusedRuntimeOrLocalExecutionHostId(state)
   )
-}
-
-export function getSettingsForWorktreeRuntimeOwner(
-  state: WorktreeRuntimeOwnerState,
-  worktreeId: string | null | undefined
-): Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> {
-  return {
-    ...state.settings,
-    activeRuntimeEnvironmentId: getRuntimeEnvironmentIdForWorktree(state, worktreeId)
-  }
 }

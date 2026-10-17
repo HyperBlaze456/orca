@@ -7,13 +7,9 @@ import {
   toSshExecutionHostId
 } from '../../../../shared/execution-host'
 import { translate } from '@/i18n/i18n'
-import {
-  canMoveSshHostToManagedServer,
-  managedServerMoveOfferText,
-  moveSshHostFromToast
-} from '@/ssh/ssh-managed-server-move'
 import { useAppStore } from '../../store'
 import { withoutConvertedSshHostRows } from '../../store/repos/converted-ssh-host-rows'
+import { rekeyWorktreeVisitHost } from '@/lib/worktree-visit-recency'
 import { preserveConvertedSshBrowserPages } from '../../store/repos/converted-ssh-browser-pages'
 
 type ManagedServerStatus = SshConnectionState['managedServer']
@@ -37,10 +33,7 @@ export function applySshManagedServerTransition(
   if (next?.kind === 'relay') {
     catalogLoadByTarget.delete(targetId)
   }
-  if (isNewMoveOffer(previous, next) && canMoveSshHostToManagedServer()) {
-    offerManagedServerMove(targetId, next.terminals)
-    return
-  }
+  remountBridgedTabsOnce(targetId, next)
   if (
     next?.kind === 'relay' &&
     next.reason === 'refused' &&
@@ -58,6 +51,31 @@ export function applySshManagedServerTransition(
       )
     )
   }
+}
+
+// Why not `previous`: a connect reply can write the bridged status into the store before its push.
+const bridgedTargetsRemounted = new Set<string>()
+
+/** COMPAT(legacy-relay-bridge): panes that mounted inert before the connect now reattach. */
+function remountBridgedTabsOnce(targetId: string, next: ManagedServerStatus): void {
+  if (!(next?.kind === 'relay' && next.bridged)) {
+    bridgedTargetsRemounted.delete(targetId)
+    return
+  }
+  if (bridgedTargetsRemounted.has(targetId)) {
+    return
+  }
+  bridgedTargetsRemounted.add(targetId)
+  // Why lazy: the panes module subscribes to the bridge when loaded; importing it here would do so
+  // for every importer of this file.
+  void import('../../components/terminal-pane/legacy-relay-bridge-panes').then(
+    ({ legacyRelayBridgedTabIds }) => {
+      const store = useAppStore.getState()
+      for (const tabId of legacyRelayBridgedTabIds(targetId)) {
+        store.remountTerminalTabForRecovery(tabId)
+      }
+    }
+  )
 }
 
 type CatalogLoad = {
@@ -137,8 +155,42 @@ async function loadManagedServerCatalogs(targetId: string, load: CatalogLoad): P
   if (!isCurrent()) {
     return
   }
-  useAppStore.setState((state) => withoutConvertedSshHostRows(state, targetId))
+  useAppStore.setState((state) => {
+    // Why: the host's workspaces are the server's now; unmoved, the next prune drops their recency.
+    const lastVisitedAtByWorktreeId = rekeyWorktreeVisitHost(
+      state.lastVisitedAtByWorktreeId,
+      toSshExecutionHostId(targetId),
+      toRuntimeExecutionHostId(environmentId)
+    )
+    return {
+      ...withoutConvertedSshHostRows(state, targetId),
+      ...(lastVisitedAtByWorktreeId === state.lastVisitedAtByWorktreeId
+        ? {}
+        : { lastVisitedAtByWorktreeId })
+    }
+  })
   rehomeActiveWorkspace(targetId, environmentId)
+  if (!useAppStore.getState().startupWorktreeRefreshCompleted) {
+    rehomeAfterStartupScan(targetId, environmentId, isCurrent)
+  }
+}
+
+/** Why: on cold start the server's worktree rows arrive with startup's scan, after the attempt above. */
+function rehomeAfterStartupScan(
+  targetId: string,
+  environmentId: string,
+  isCurrent: () => boolean
+): void {
+  const unsubscribe = useAppStore.subscribe((state) => {
+    if (!isCurrent()) {
+      unsubscribe()
+      return
+    }
+    if (state.startupWorktreeRefreshCompleted) {
+      unsubscribe()
+      rehomeActiveWorkspace(targetId, environmentId)
+    }
+  })
 }
 
 /** Why: an active workspace left on the SSH host keeps showing panes that dial the stopped relay. */
@@ -152,30 +204,4 @@ function rehomeActiveWorkspace(targetId: string, environmentId: string): void {
   ) {
     state.setActiveWorktree(state.activeWorktreeId, runtimeHostId)
   }
-}
-
-/** Main marks only the first live-terminals stop per host per app version with `offerMove`. */
-function isNewMoveOffer(
-  previous: ManagedServerStatus,
-  next: ManagedServerStatus
-): next is Extract<NonNullable<ManagedServerStatus>, { kind: 'relay' }> {
-  return (
-    next?.kind === 'relay' &&
-    next.offerMove === true &&
-    !(previous?.kind === 'relay' && previous.offerMove)
-  )
-}
-
-function offerManagedServerMove(targetId: string, terminals: number | undefined): void {
-  const host = useAppStore.getState().sshTargetLabels.get(targetId) ?? targetId
-  toast(managedServerMoveOfferText(host, terminals), {
-    id: `ssh-managed-server-move:${targetId}`,
-    duration: Infinity,
-    action: {
-      label: translate('auto.ssh.managedServerMove.confirm', 'Move'),
-      onClick: () => void moveSshHostFromToast(targetId, host)
-    },
-    // "Not now" only closes the toast; the SSH Hosts status line keeps the action.
-    cancel: { label: translate('auto.ssh.managedServerMove.notNow', 'Not now'), onClick: () => {} }
-  })
 }

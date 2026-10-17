@@ -1,4 +1,4 @@
-/** The live collaborators a host conversion needs: the relay, the direct session and the server. */
+/** The live collaborators a host conversion needs: the census, the direct session and the server. */
 import { encodePairingOffer } from '../../shared/pairing'
 import {
   getPreferredPairingOffer,
@@ -9,13 +9,18 @@ import type { OrcadMigrationDestinationCatalog } from './orcad-migration-cutover
 import {
   abortRemoteOrcadMigrationCatalog,
   commitRemoteOrcadMigrationCatalog,
+  listRemoteOrcadRepositories,
   readRemoteOrcadMigrationCatalogState,
   stageRemoteOrcadMigrationCatalog,
   stageRemoteOrcadMigrationSnapshotChunk
 } from './orcad-migration-catalog-client'
-import { orcadMigrationRelayPtyLister } from './orcad-migration-relay-pty-lister'
 import { censusHostRelayTerminalsFor } from './ssh-host-relay-census-for-target'
 import type { OrcadManagedConversionArgs } from './orcad-runtime-conversion'
+import type { OrcadServerRepository } from './orcad-migration-repository-link'
+import {
+  listRemoteOrcadFolderCatalog,
+  type OrcadServerFolderCatalog
+} from './orcad-server-folder-workspaces'
 
 /** The T6-9 client against this server, pinned to the runtime it paired with. */
 export function orcadMigrationDestinationFor(
@@ -32,15 +37,40 @@ export function orcadMigrationDestinationFor(
   }
 }
 
-export function conversionCollaborators(
-  sshTargetId: string
-): Pick<
+/** The projects this server already holds, read through the same pinned pairing. */
+export function orcadServerRepositoriesFor(
+  environment: KnownRuntimeEnvironment
+): Promise<OrcadServerRepository[]> {
+  const pairingCode = encodePairingOffer(getPreferredPairingOffer(environment))
+  return listRemoteOrcadRepositories(
+    pairingCode,
+    environment.runtimeId ? { expectedRuntimeId: environment.runtimeId } : {}
+  )
+}
+
+/** The folder workspaces this server already holds, read through the same pinned pairing. */
+export function orcadServerFolderCatalogFor(
+  environment: KnownRuntimeEnvironment
+): Promise<OrcadServerFolderCatalog> {
+  const pairingCode = encodePairingOffer(getPreferredPairingOffer(environment))
+  return listRemoteOrcadFolderCatalog(
+    pairingCode,
+    environment.runtimeId ? { expectedRuntimeId: environment.runtimeId } : {}
+  )
+}
+
+export function conversionCollaborators(): Pick<
   OrcadManagedConversionArgs,
-  'destinationFor' | 'listRelayPtyIds' | 'censusHost' | 'releaseDirectSession'
+  | 'destinationFor'
+  | 'serverRepositoriesFor'
+  | 'serverFolderCatalogFor'
+  | 'censusHost'
+  | 'releaseDirectSession'
 > {
   return {
     destinationFor: orcadMigrationDestinationFor,
-    listRelayPtyIds: orcadMigrationRelayPtyLister(sshTargetId),
+    serverRepositoriesFor: orcadServerRepositoriesFor,
+    serverFolderCatalogFor: orcadServerFolderCatalogFor,
     censusHost: (target) => censusHostRelayTerminalsFor(target)(),
     releaseDirectSession: disconnectRegisteredSshTarget
   }

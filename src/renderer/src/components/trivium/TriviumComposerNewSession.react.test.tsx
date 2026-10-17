@@ -13,6 +13,7 @@ import type {
   LaunchAgentInNewTabArgs,
   LaunchAgentInNewTabResult
 } from '@/lib/launch-agent-in-new-tab'
+import { settleAgentLaunchPaneStart } from '@/lib/agent-launch-pane-start'
 import { useAppStore } from '@/store'
 import { G2 } from './trivium-model-tables.fixture'
 import {
@@ -59,15 +60,6 @@ vi.mock('@/lib/launch-agent-in-new-tab', async (importOriginal) => {
   launcher.actual = actual.launchAgentInNewTab
   return { ...actual, launchAgentInNewTab: launcher.launch }
 })
-
-// Stands in for the host: a launch that carries a prompt starts its agent through `agent.launchReplay`.
-const hostRpc = vi.hoisted(() =>
-  vi.fn<(target: unknown, method: string, params: Record<string, unknown>) => Promise<unknown>>()
-)
-vi.mock('@/runtime/runtime-rpc-client', async (importOriginal) => ({
-  ...(await importOriginal<object>()),
-  callRuntimeRpc: hostRpc
-}))
 
 // Stands in for the PTY: the real launch pastes the prompt once the agent is ready.
 const paste = vi.hoisted(() => vi.fn())
@@ -445,11 +437,6 @@ describe('composer launch with the real store', () => {
     launcher.launch.mockImplementation(
       (args: LaunchAgentInNewTabArgs) => launcher.actual?.(args) ?? null
     )
-    hostRpc.mockReset().mockImplementation(async (_target, _method, params) => ({
-      outcome: { kind: 'terminal', handle: 'term_1', paneKey: String(params.paneKey) },
-      worktreeId: String(params.worktreeId ?? ''),
-      receipt: { mode: 'terminal', preferred: 'terminal', reason: 'user_default', detail: 'x' }
-    }))
     detection.ids = ['claude']
   })
 
@@ -477,6 +464,12 @@ describe('composer launch with the real store', () => {
     expect(useAppStore.getState().activeView).toBe('trivium')
     expect(focusTerminal).not.toHaveBeenCalled()
     expect(paste).toHaveBeenCalledOnce()
+    // Stands in for the launch pane: its first spawn says the agent started in this PTY.
+    const leafId = useAppStore.getState().terminalLayoutsByTabId[tabId ?? '']?.activeLeafId
+    expect(leafId).toBeTruthy()
+    await act(async () => {
+      settleAgentLaunchPaneStart(tabId ?? undefined, leafId ?? undefined, 'pty-agent')
+    })
     await waitFor(() =>
       expect(note()).toHaveTextContent('Sent to Claude. It runs in a new tab of this workspace.')
     )
