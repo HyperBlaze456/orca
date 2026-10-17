@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useAppStore } from '@/store'
 import { getExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
-import { runtimeTargetForExecutionHostId } from '@/runtime/runtime-client-target'
+import { runtimeRpcTargetForAuthorityKey } from '@/runtime/runtime-client-target'
 import { translate } from '@/i18n/i18n'
 import { readTriviumTickets } from './trivium-ticket-records'
 import { isTriviumRecord, readTriviumWorkspaceProjection } from './trivium-workspace-query'
@@ -64,7 +64,7 @@ export function useTriviumProjection(
       return
     }
     const abort = new AbortController()
-    const target = runtimeTargetForExecutionHostId(executionHostId)
+    const target = runtimeRpcTargetForAuthorityKey(executionHostId)
     const load = async (): Promise<void> => {
       try {
         if (!target) {

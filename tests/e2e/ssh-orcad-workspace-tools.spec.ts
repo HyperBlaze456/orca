@@ -5,31 +5,28 @@
  */
 import { expect, test } from './helpers/orca-app'
 import { reconnect } from './helpers/orcad-convert-flow'
-import { shellQuote } from './helpers/docker-ssh-relay-target'
 import { callEnvironment, createPairedHostTerminal } from './helpers/paired-host-terminal'
-import { reserveLocalPort } from './helpers/ssh-port-forward-snapshot-barrier'
+import { reserveLocalPort } from './helpers/reserve-local-port'
 import { openTerminalWorkspaceRootLink } from './helpers/terminal-workspace-root-link'
 import {
   echoMarker,
   expectTerminalAnswers,
   launchManagedWorkspace,
   openTerminalTab,
-  ORCAD_TEMPLATE,
+  skipUnlessManagedDockerHost,
   typeInTerminal,
   withManagedHost
 } from './helpers/orcad-managed-workspace'
+import { quotePosixShell } from '../../src/shared/wsl-login-shell-command'
 
-test.skip(
-  !ORCAD_TEMPLATE || process.env.ORCA_E2E_SSH_DOCKER !== '1',
-  'Needs Docker and server template'
-)
+skipUnlessManagedDockerHost()
 test.skip(process.platform === 'win32', 'The Docker SSH host uses POSIX tooling')
 
 test('Quick Open finds a file in a monorepo-sized managed workspace', async (// oxlint-disable-next-line no-empty-pattern -- Owns its app launch through a restart session.
 {}, testInfo) => {
   test.setTimeout(10 * 60_000)
   await withManagedHost(testInfo, async (fixture) => {
-    const repo = shellQuote(fixture.host.remoteRepoPath)
+    const repo = quotePosixShell(fixture.host.remoteRepoPath)
     // ~22.6k tracked paths: past the size whose single reply once overflowed the transport (#12547).
     fixture.host.exec!(
       [
@@ -61,8 +58,6 @@ test('Quick Open finds a file in a monorepo-sized managed workspace', async (// 
 for (const acrossReconnect of [false, true]) {
   test(`a managed host reports its listener, and an SSH forward reaches it${acrossReconnect ? ' across a reconnect' : ''}`, async (// oxlint-disable-next-line no-empty-pattern -- Owns its app launch through a restart session.
   {}, testInfo) => {
-    // Why fixme: saved forwards are re-established only by the relay session's connect callbacks.
-    test.fixme(acrossReconnect, 'A managed host reconnect never calls restorePortForwards')
     test.setTimeout(10 * 60_000)
     const remotePort = 7860
     const marker = `ORCA_FORWARD_${Date.now()}`
@@ -72,7 +67,7 @@ for (const acrossReconnect of [false, true]) {
       const script = `require('node:http').createServer((_q, r) => r.end(${JSON.stringify(marker)})).listen(${remotePort}, '127.0.0.1')`
       // Started from the workspace so the scan attributes it to this workspace.
       fixture.host.exec!(
-        `cd ${shellQuote(fixture.host.remoteRepoPath)} && nohup node -e ${shellQuote(script)} >/tmp/orca-http.log 2>&1 < /dev/null &`
+        `cd ${quotePosixShell(fixture.host.remoteRepoPath)} && nohup node -e ${quotePosixShell(script)} >/tmp/orca-http.log 2>&1 < /dev/null &`
       )
       // The scan the Ports panel shows for a workspace on this host.
       await expect
@@ -97,11 +92,18 @@ for (const acrossReconnect of [false, true]) {
         }
       }
       await expect.poll(fetchMarker, { timeout: 30_000 }).toBe(marker)
+      let forwardId = forward.id
       if (acrossReconnect) {
         await reconnect(page, seeded.targetId)
         await expect.poll(fetchMarker, { timeout: 60_000 }).toBe(marker)
+        // The restored forward is a new entry for the same saved port.
+        const restored = await page.evaluate(
+          (targetId) => window.api.ssh.listPortForwards({ targetId }),
+          seeded.targetId
+        )
+        forwardId = restored.find((entry) => entry.localPort === localPort)?.id ?? forwardId
       }
-      await page.evaluate((id) => window.api.ssh.removePortForward({ id }), forward.id)
+      await page.evaluate((id) => window.api.ssh.removePortForward({ id }), forwardId)
       await expect.poll(fetchMarker, { timeout: 30_000 }).not.toBe(marker)
     }).finally(() => reservation.release())
   })
@@ -109,17 +111,16 @@ for (const acrossReconnect of [false, true]) {
 
 test('a terminal link opens an image outside the managed workspace', async (// oxlint-disable-next-line no-empty-pattern -- Owns its app launch through a restart session.
 {}, testInfo) => {
-  // Why fixme: in-workspace links work (ssh-orcad-terminal-root-owner); this path gets no link at all.
-  test.fixme(true, 'A managed terminal does not linkify a path outside its workspace')
   test.setTimeout(10 * 60_000)
   const imagePath = '/tmp/orca-ssh-external-preview.png'
   const imageBase64 =
     'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVR4AWN8z8DwnwEJMDGgAcICAO2mBAXmO4drAAAAAElFTkSuQmCC'
   await withManagedHost(testInfo, async (fixture) => {
     fixture.host.exec!(
-      `printf '%s' ${shellQuote(imageBase64)} | base64 -d > ${shellQuote(imagePath)}`
+      `printf '%s' ${quotePosixShell(imageBase64)} | base64 -d > ${quotePosixShell(imagePath)}`
     )
-    const { page, seeded } = await launchManagedWorkspace(fixture)
+    // Why /root: the default folder workspace is /tmp, which would make the image a workspace file.
+    const { page, seeded } = await launchManagedWorkspace(fixture, { folderPath: '/root' })
     // A link is only clickable once the shell has printed it, so wait for one that answers.
     await expectTerminalAnswers(page, await openTerminalTab(page, seeded.worktreeId))
     await openTerminalWorkspaceRootLink(page, testInfo, imagePath, 'open')
@@ -150,7 +151,7 @@ test('a managed terminal reports agent status from hooks and from Pi-style title
         '--data-urlencode "paneKey=${ORCA_PANE_KEY}" --data-urlencode "tabId=${ORCA_TAB_ID}"',
         '--data-urlencode "worktreeId=${ORCA_WORKTREE_ID}" --data-urlencode "env=${ORCA_AGENT_HOOK_ENV}"',
         '--data-urlencode "version=${ORCA_AGENT_HOOK_VERSION}"',
-        `--data-urlencode ${shellQuote(`payload=${payload}`)} >/tmp/orca-hook.log 2>&1 ) &`
+        `--data-urlencode ${quotePosixShell(`payload=${payload}`)} >/tmp/orca-hook.log 2>&1 ) &`
       ].join(' ')
     )
     await expect

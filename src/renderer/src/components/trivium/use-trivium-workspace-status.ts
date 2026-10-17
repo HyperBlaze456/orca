@@ -9,10 +9,10 @@ import {
   getRuntimeEnvironmentIdForWorktree
 } from '@/lib/worktree-runtime-owner'
 import {
-  runtimeTargetForExecutionHostId,
-  runtimeTargetForOwnerEnvironment,
-  type RuntimeClientTarget
+  runtimeRpcTargetForAuthorityKey,
+  runtimeTargetForOwnerEnvironment
 } from '@/runtime/runtime-client-target'
+import type { RuntimeClientTarget } from '../../../../shared/runtime-client-target'
 import { subscribeRuntimeFileChanges } from '@/runtime/runtime-file-watch-client'
 import { readTriviumWorkspaceProjection } from './trivium-workspace-query'
 import { useAppStore } from '@/store'
@@ -185,7 +185,7 @@ export function useTriviumWorkspaceStatus(
   const runtimeOwnerEnvironmentId = useAppStore((state) =>
     getRuntimeEnvironmentIdForWorktree(state, workspaceId)
   )
-  const target = useMemo(() => runtimeTargetForExecutionHostId(executionHostId), [executionHostId])
+  const target = useMemo(() => runtimeRpcTargetForAuthorityKey(executionHostId), [executionHostId])
   // Why: the watch must follow the host that OWNS this workspace, not the globally focused
   // runtime — otherwise a remote workspace never sees its events and a local one under an
   // active environment starts no local watcher (useEditorExternalWatch does the same).
