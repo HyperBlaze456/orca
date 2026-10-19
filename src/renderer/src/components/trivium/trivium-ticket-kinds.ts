@@ -1,6 +1,6 @@
 import type { TriviumTicketState } from '../../../../shared/trivium-workspace-status'
 import { translate } from '@/i18n/i18n'
-import { compareNumericLocaleText } from '@/lib/locale-text-collators'
+import { compareNumericLocaleText } from '../../../../shared/locale-text-collators'
 
 /** What a ticket row shows: the approval wait first, otherwise the workflow state. */
 export type TriviumTicketKind =

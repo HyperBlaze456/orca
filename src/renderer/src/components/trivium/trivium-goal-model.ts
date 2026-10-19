@@ -3,7 +3,7 @@ import type {
   TriviumTicketState,
   TriviumWorkspaceStatus
 } from '../../../../shared/trivium-workspace-status'
-import { compareNumericLocaleText } from '@/lib/locale-text-collators'
+import { compareNumericLocaleText } from '../../../../shared/locale-text-collators'
 import { indexTriviumGoalEdges } from './trivium-goal-edges'
 import type { TriviumDerivedOutcome, TriviumGoalOutcome } from './trivium-goal-work-records'
 import { triviumIdSlug } from './trivium-harness-text'

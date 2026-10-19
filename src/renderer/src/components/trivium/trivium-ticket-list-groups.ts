@@ -1,4 +1,4 @@
-import { compareNumericLocaleText } from '@/lib/locale-text-collators'
+import { compareNumericLocaleText } from '../../../../shared/locale-text-collators'
 import type { TriviumModel } from './trivium-goal-model'
 import { TRIVIUM_TICKET_LIST_ORDER, type TriviumTicketKind } from './trivium-ticket-kinds'
 import type {
