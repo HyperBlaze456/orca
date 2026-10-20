@@ -6,7 +6,7 @@ import type {
 import { selectEditorExternalWatchTargets } from '@/hooks/editor-external-watch-targets'
 import {
   getExecutionHostIdForWorktree,
-  getRuntimeEnvironmentIdForWorktree
+  runtimeEnvironmentIdWithLegacyFallbackUnlessTwin
 } from '@/lib/worktree-runtime-owner'
 import {
   runtimeRpcTargetForAuthorityKey,
@@ -183,7 +183,7 @@ export function useTriviumWorkspaceStatus(
 ): TriviumWorkspaceStatusResult {
   const executionHostId = useAppStore((state) => getExecutionHostIdForWorktree(state, workspaceId))
   const runtimeOwnerEnvironmentId = useAppStore((state) =>
-    getRuntimeEnvironmentIdForWorktree(state, workspaceId)
+    runtimeEnvironmentIdWithLegacyFallbackUnlessTwin(state, workspaceId)
   )
   const target = useMemo(() => runtimeRpcTargetForAuthorityKey(executionHostId), [executionHostId])
   // Why: the watch must follow the host that OWNS this workspace, not the globally focused
