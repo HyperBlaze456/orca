@@ -289,7 +289,7 @@ import {
   UpdatePrState,
   UpdatePrTitle
 } from './github-pull-request-update-params'
-import { RepoSelector, SlugRepo } from './github-repo-target-params'
+import { RepoSelector, RepoShow, SlugRepo } from './github-repo-target-params'
 import {
   IssuesList,
   RateLimit,
@@ -405,6 +405,7 @@ import {
 } from './notifications-params'
 import {
   OrcadMigrationCatalogParams,
+  OrcadMigrationCatalogReferenceParams,
   OrcadMigrationCommitCatalogParams
 } from './orcad-migration-params'
 import {
@@ -520,6 +521,7 @@ import {
   DictationHandle,
   DictationSetup,
   DictationStart,
+  OpenAiSpeechKeySet,
   SpeechModelAction
 } from './speech-params'
 import {
@@ -543,6 +545,7 @@ import {
   HandoffStatusParams,
   HistoryParams,
   HoldParams,
+  ItemParams,
   ModelCatalogParams,
   OptionsParams,
   QueuedMessageActionParams,
@@ -605,7 +608,12 @@ import {
 import { TriviumProgress, TriviumTickets } from './trivium-params'
 import { UpdaterCheckParams } from './updater-params'
 import {
+  UsageCredentialApiKeyParams,
+  UsageCredentialSessionCookieParams
+} from './usage-credentials-params'
+import {
   LayoutApplyParams,
+  LayoutReportViewParams,
   LayoutSubscribeParams,
   LayoutUnsubscribeParams
 } from './workspace-layout-params'
@@ -668,6 +676,11 @@ export const RPC_PARAMS_BY_METHOD = {
   'accounts.finishClaudeSignIn': FinishClaudeSignInParams,
   'accounts.list': ListAccountsParams,
   'accounts.listData': null,
+  'accounts.minimaxClearApiKey': null,
+  'accounts.minimaxClearSessionCookie': null,
+  'accounts.minimaxCredentialsStatus': null,
+  'accounts.minimaxSaveApiKey': UsageCredentialApiKeyParams,
+  'accounts.minimaxSaveSessionCookie': UsageCredentialSessionCookieParams,
   'accounts.removeClaude': RemoveAccountParams,
   'accounts.removeCodex': RemoveAccountParams,
   'accounts.removeData': RemoveDataAccountParams,
@@ -678,6 +691,9 @@ export const RPC_PARAMS_BY_METHOD = {
   'accounts.setHostLaunchEnv': HostAccountLaunchEnvParams,
   'accounts.subscribe': null,
   'accounts.unsubscribe': AccountsUnsubscribeParams,
+  'accounts.zcodePlanClearApiKey': null,
+  'accounts.zcodePlanCredentialsStatus': null,
+  'accounts.zcodePlanSaveApiKey': UsageCredentialApiKeyParams,
   'agent.launch': AgentLaunch,
   'agent.launchReplay': AgentLaunchReplay,
   'agentHooks.prepareCodexForWslPane': PrepareCodexForWslPaneParams,
@@ -696,6 +712,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'agentSession.handoffStatus': HandoffStatusParams,
   'agentSession.history': HistoryParams,
   'agentSession.hold': HoldParams,
+  'agentSession.item': ItemParams,
   'agentSession.modelCatalog': ModelCatalogParams,
   'agentSession.options': OptionsParams,
   'agentSession.queuedMessageDelete': QueuedMessageActionParams,
@@ -1066,6 +1083,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'jira.updateIssue': IssueUpdate,
   'layout.apply': LayoutApplyParams,
   'layout.getRemoteSnapshots': null,
+  'layout.reportView': LayoutReportViewParams,
   'layout.subscribe': LayoutSubscribeParams,
   'layout.unsubscribe': LayoutUnsubscribeParams,
   'linear.addIssueComment': IssueCommentOfLinearParams,
@@ -1141,6 +1159,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'notifications.unregisterPush': null,
   'notifications.unsubscribe': NotificationUnsubscribeParams,
   'orcad.migration.abortCatalog': OrcadMigrationCatalogParams,
+  'orcad.migration.abortCatalogByReference': OrcadMigrationCatalogReferenceParams,
   'orcad.migration.catalogState': OrcadMigrationCatalogParams,
   'orcad.migration.commitCatalog': OrcadMigrationCommitCatalogParams,
   'orcad.migration.stageBlobChunk': OrcadMigrationBlobChunkRequestSchema,
@@ -1239,7 +1258,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'repo.searchRefs': RepoSearchRefs,
   'repo.setBaseRef': RepoSetBaseRef,
   'repo.setupScriptImports': RepoSelector,
-  'repo.show': RepoSelector,
+  'repo.show': RepoShow,
   'repo.sparsePresets': RepoSelector,
   'repo.update': RepoUpdate,
   'runtime.automaticWork.resume': null,
@@ -1302,6 +1321,9 @@ export const RPC_PARAMS_BY_METHOD = {
   'speech.models.delete': SpeechModelAction,
   'speech.models.download': SpeechModelAction,
   'speech.models.list': null,
+  'speech.openAiKey.clear': null,
+  'speech.openAiKey.set': OpenAiSpeechKeySet,
+  'speech.openAiKey.status': null,
   'ssh.addTarget': SshTargetAdd,
   'ssh.browseDir': SshBrowseDir,
   'ssh.connect': SshConnect,
