@@ -38,7 +38,7 @@ export async function chooseLocalBuild(
       type: 'question',
       title: 'Use Local Orca Build?',
       message: `${app.getVersion()} → ${candidate.version}`,
-      detail: `${terminalSummary}\nWorkspace cards and settings are compatible with state schema ${SCHEMA_VERSION}.\n\nThe build must have the same valid code signature as Orca or installation will stop.`,
+      detail: `${terminalSummary}\nWorkspace cards and settings are compatible with state schema ${SCHEMA_VERSION}.\n\nThe build must have the same valid code signature as Orca or installation will stop.\nOrca keeps following this manifest and downloads newer builds from it on its own.`,
       buttons: ['Use Local Build', 'Cancel'],
       defaultId: 0,
       cancelId: 1,

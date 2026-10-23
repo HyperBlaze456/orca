@@ -3,6 +3,10 @@ import type { BrowserWindow, IpcMainInvokeEvent } from 'electron'
 import type { ReleaseBuildListResult, UpdateCheckOptions } from '../../shared/update-status-types'
 import { RELEASE_CHANNELS, type ReleaseChannel } from '../../shared/release-channel'
 import { isTrustedUIRenderer } from '../ipc/ui'
+import {
+  readFollowedLocalBuildManifestPath,
+  writeFollowedLocalBuildManifestPath
+} from '../local-builds/local-build-follow'
 import type { Store } from '../persistence'
 import { logStartupMilestone } from '../startup/startup-diagnostics'
 import {
@@ -63,6 +67,10 @@ function buildUpdaterSetupOptions(store: Store, options?: UpdaterSetupHooks): Up
       store.updateUI({ dismissedUpdateNudgeId: id })
     },
     getReleaseChannelOverride: () => store.getUI().releaseChannelOverride ?? null,
+    getFollowedLocalBuildManifestPath: () =>
+      readFollowedLocalBuildManifestPath(app.getPath('userData')),
+    setFollowedLocalBuildManifestPath: (manifestPath) =>
+      writeFollowedLocalBuildManifestPath(app.getPath('userData'), manifestPath),
     onBeforeQuitFailure: options?.onBeforeUpdateQuitFailure,
     installMode: options?.updateInstallMode
   }

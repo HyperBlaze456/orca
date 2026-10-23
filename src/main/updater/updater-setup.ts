@@ -18,7 +18,7 @@ import { registerAutoUpdaterHandlers } from '../updater-events'
 import { getServeUpdateHandoffFailure } from '../serve-update-handoff'
 import { recordUpdaterLifecycle } from '../updater-lifecycle-diagnostics'
 import { AUTO_UPDATE_CHECK_INTERVAL_MS } from './updater-state'
-import { UpdaterDownloadInstall } from './updater-download-install'
+import { UpdaterLocalBuildFollow } from './updater-local-build-follow'
 import { configureMacShipItScheduling } from './macos-shipit-scheduling'
 import type { PreQuitCleanupFailureMode, UpdateInstallMode } from './updater-state'
 
@@ -31,12 +31,15 @@ export type UpdaterSetupOptions = {
   setPendingUpdateNudgeId?: (id: string | null) => void
   setDismissedUpdateNudgeId?: (id: string | null) => void
   getReleaseChannelOverride?: () => ReleaseChannel | null
+  /** Manifest a local build was last chosen from; newer builds there are staged without the picker. */
+  getFollowedLocalBuildManifestPath?: () => Promise<string | null>
+  setFollowedLocalBuildManifestPath?: (manifestPath: string | null) => Promise<void>
   installMode?: UpdateInstallMode
   onBeforeQuitFailure?: PreQuitCleanupFailureMode
 }
 
 /** Initializes electron-updater and attaches lifecycle/event bridges. */
-export class UpdaterSetup extends UpdaterDownloadInstall {
+export class UpdaterSetup extends UpdaterLocalBuildFollow {
   checkForUpdates(): void {
     this.checkForUpdatesInBackground()
   }
@@ -255,6 +258,12 @@ export class UpdaterSetup extends UpdaterDownloadInstall {
       this.scheduleAutomaticUpdateCheck(AUTO_UPDATE_CHECK_INTERVAL_MS)
     } else {
       this.scheduleAutomaticUpdateCheck(AUTO_UPDATE_CHECK_INTERVAL_MS - msSinceLastCheck)
+    }
+    if (opts?.getFollowedLocalBuildManifestPath && opts.setFollowedLocalBuildManifestPath) {
+      void this.startFollowingLocalBuilds({
+        load: opts.getFollowedLocalBuildManifestPath,
+        persist: opts.setFollowedLocalBuildManifestPath
+      })
     }
   }
 }

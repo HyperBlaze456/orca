@@ -26,6 +26,7 @@ type ManifestFile = {
 
 export type LocalBuildCandidate = {
   version: string
+  manifestPath: string
   compatibility: LocalBuildCompatibility
   manifestContent: string
   artifacts: Map<string, { file: FileHandle; size: number }>
@@ -264,6 +265,7 @@ export async function loadLocalBuildCandidate(
   }
   return {
     version: manifest.version,
+    manifestPath,
     compatibility: target.compatibility,
     manifestContent: stringify({
       version: manifest.version,
