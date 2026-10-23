@@ -11,6 +11,7 @@ import {
 } from '../../shared/release-channel'
 import { compareVersions } from '../updater-fallback'
 import { profileStateBuildCompatibilityError } from '../../shared/profile-state-build-compatibility'
+import type { LocalBuildCandidate } from '../local-builds/local-build-candidate'
 import { listReleaseBuilds, resolveTargetBuild } from '../updater-release-builds'
 import { ReleaseBuildListCache, type ReleaseBuildListOptions } from '../updater-release-build-cache'
 import { UpdaterMenuChecks } from './updater-menu-checks'
@@ -37,41 +38,12 @@ export abstract class UpdaterBuildSelection extends UpdaterMenuChecks {
     }
     this.localBuildSelectionInProgress = true
     try {
-      const [{ chooseLocalBuild }, { startLocalBuildFeed }] = await Promise.all([
-        import('../local-builds/local-build-switch'),
-        import('../local-builds/local-build-feed-server')
-      ])
+      const { chooseLocalBuild } = await import('../local-builds/local-build-switch')
       const candidate = await chooseLocalBuild(this.mainWindowRef)
       if (!candidate) {
         return
       }
-      const compatibilityError = profileStateBuildCompatibilityError(
-        app.getVersion(),
-        candidate.version
-      )
-      if (compatibilityError) {
-        await candidate.close()
-        throw new Error(compatibilityError)
-      }
-      this.closeLocalBuildFeed()
-      const feed = await startLocalBuildFeed(candidate)
-      this.activeLocalBuildFeed = feed
-      this.activeUpdateSource = 'local'
-      this.clearPrereleaseFallbackContext()
-      this.clearPublishingWindowLastGoodCheck()
-      this.clearAvailableUpdateContext()
-      this.activeUpdateNudgeId = null
-      this.userInitiatedCheck = true
-      this.sendStatus({ state: 'checking', userInitiated: true })
-
-      const updater = this.getAutoUpdater()
-      updater.allowDowngrade = true
-      updater.disableDifferentialDownload = true
-      updater.setFeedURL({ provider: 'generic', url: feed.url })
-      const attemptId = this.beginUpdateCheckAttempt()
-      this.markUpdateCheckLaunched(attemptId)
-      await updater.checkForUpdates()
-      this.handleSettledUpdateCheckPromise(attemptId)
+      await this.activateLocalBuild(candidate, { userInitiated: true })
     } catch (error) {
       this.userInitiatedCheck = false
       this.sendLocalBuildErrorAndRestore(String((error as Error)?.message ?? error), true)
@@ -79,6 +51,45 @@ export abstract class UpdaterBuildSelection extends UpdaterMenuChecks {
       this.localBuildSelectionInProgress = false
     }
   }
+
+  /** Serves `candidate` over a loopback feed and checks it. Takes ownership: the candidate is closed on failure or with the feed. */
+  protected async activateLocalBuild(
+    candidate: LocalBuildCandidate,
+    { userInitiated }: { userInitiated: boolean }
+  ): Promise<void> {
+    const compatibilityError = profileStateBuildCompatibilityError(
+      app.getVersion(),
+      candidate.version
+    )
+    if (compatibilityError) {
+      await candidate.close()
+      throw new Error(compatibilityError)
+    }
+    const { startLocalBuildFeed } = await import('../local-builds/local-build-feed-server')
+    this.closeLocalBuildFeed()
+    const feed = await startLocalBuildFeed(candidate)
+    this.activeLocalBuildFeed = feed
+    this.activeUpdateSource = 'local'
+    this.clearPrereleaseFallbackContext()
+    this.clearPublishingWindowLastGoodCheck()
+    this.clearAvailableUpdateContext()
+    this.activeUpdateNudgeId = null
+    this.userInitiatedCheck = userInitiated
+    this.sendStatus({ state: 'checking', ...(userInitiated ? { userInitiated: true } : {}) })
+    this.onLocalBuildActivated(candidate)
+
+    const updater = this.getAutoUpdater()
+    updater.allowDowngrade = true
+    updater.disableDifferentialDownload = true
+    updater.setFeedURL({ provider: 'generic', url: feed.url })
+    const attemptId = this.beginUpdateCheckAttempt()
+    this.markUpdateCheckLaunched(attemptId)
+    await updater.checkForUpdates()
+    this.handleSettledUpdateCheckPromise(attemptId)
+  }
+
+  /** Hook for layers that keep following a manifest after a build is activated from it. */
+  protected onLocalBuildActivated(_candidate: LocalBuildCandidate): void {}
 
   protected async listAvailableReleaseBuilds(
     channel: ReleaseChannel,
