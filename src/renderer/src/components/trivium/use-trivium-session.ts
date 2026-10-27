@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { useAppStore } from '@/store'
 import { deriveNotesSendAgentTargets } from '@/lib/notes-send-agent-targets'
+import type { StructuredChatTabNames } from '@/runtime/structured-chat-tab-name'
 import {
   activeAgentNotesSendFailureMessage,
   sendNotesToActiveAgentSession
@@ -14,6 +15,9 @@ import {
   useTriviumSessionState,
   triviumSessionTargetKey
 } from './trivium-session-state'
+
+// Why empty: only terminal targets are kept below, and chat names only label structured-chat targets.
+const NO_CHAT_TAB_NAMES: StructuredChatTabNames = new Map()
 
 export function useTriviumSession(workspaceId: string, sessionKey: string) {
   const session = useTriviumSessionState((s) => s.sessions[sessionKey] ?? EMPTY_TRIVIUM_SESSION)
@@ -36,7 +40,8 @@ export function useTriviumSession(workspaceId: string, sessionKey: string) {
         ptyIdsByTabId,
         runtimePaneTitlesByTabId
       },
-      workspaceId
+      workspaceId,
+      NO_CHAT_TAB_NAMES
     ).flatMap((target) => {
       // Why terminal only: the composer pins and previews a PTY, and a structured chat has none.
       if (target.messageTarget.kind !== 'terminal') {

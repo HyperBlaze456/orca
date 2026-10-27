@@ -8,7 +8,7 @@ import { getDefaultSettings } from '../../../../shared/constants'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import type { TuiAgent } from '../../../../shared/tui-agent'
 import type * as LaunchAgentModule from '@/lib/launch-agent-in-new-tab'
-import type { LaunchAgentInNewTabResult } from '@/lib/launch-agent-in-new-tab'
+import type { LaunchAgentInNewTabResult } from '@/lib/launch-agent-in-new-tab-host-agents'
 import { useAppStore } from '@/store'
 import { G1_SYNC, G2 } from './trivium-model-tables.fixture'
 import {
