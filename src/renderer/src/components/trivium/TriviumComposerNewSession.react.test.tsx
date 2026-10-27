@@ -9,10 +9,8 @@ import { isEphemeralSetupTerminalWorktreeId } from '../../../../shared/ephemeral
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import type { TuiAgent } from '../../../../shared/tui-agent'
 import type * as LaunchAgentModule from '@/lib/launch-agent-in-new-tab'
-import type {
-  LaunchAgentInNewTabArgs,
-  LaunchAgentInNewTabResult
-} from '@/lib/launch-agent-in-new-tab'
+import type { LaunchAgentInNewTabArgs } from '@/lib/launch-agent-in-new-tab'
+import type { LaunchAgentInNewTabResult } from '@/lib/launch-agent-in-new-tab-host-agents'
 import { settleAgentLaunchPaneStart } from '@/lib/agent-launch-pane-start'
 import { useAppStore } from '@/store'
 import { G2 } from './trivium-model-tables.fixture'
