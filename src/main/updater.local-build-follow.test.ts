@@ -71,8 +71,9 @@ async function setupFollowing(
 ): Promise<{ send: ReturnType<typeof vi.fn>; persist: ReturnType<typeof vi.fn> }> {
   const send = vi.fn()
   const { setupAutoUpdater } = await loadUpdaterModule()
-  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: The mocked updater only reads webContents.send from this window fixture.
-  setupAutoUpdater({ webContents: { send } } as never, {
+  const win = { isDestroyed: () => false, webContents: { send, isDestroyed: () => false } }
+  // oxlint-disable-next-line typescript/consistent-type-assertions -- SAFETY: The mocked updater only reads isDestroyed and webContents.send/isDestroyed from this window fixture.
+  setupAutoUpdater(win as never, {
     getLastUpdateCheckAt: () => Date.now(),
     getFollowedLocalBuildManifestPath: async () => manifestPath,
     setFollowedLocalBuildManifestPath: persist
