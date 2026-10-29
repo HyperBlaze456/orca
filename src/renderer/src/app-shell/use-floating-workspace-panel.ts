@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, type SetStateAction } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type SetStateAction
+} from 'react'
 import {
   TOGGLE_FLOATING_TERMINAL_EVENT,
   requestFloatingTerminalOpenMaximized
@@ -114,16 +121,30 @@ export function useFloatingWorkspacePanel() {
     }
   }, [settingsHydrated, enabled, setOpenWithFocus])
 
-  return {
-    cancelReturnFocusFrame,
-    enabled,
-    open,
-    openMaximized,
-    setOpenWithFocus,
-    // Retain panes’ local state while closed once the floating workspace owns tabs.
-    shouldMountPanel: enabled && (open || visibleTabCount > 0),
-    showToggleButton,
-    tourInteractionSnapshotRef,
-    visibleTabCount
-  }
+  const shouldMountPanel = enabled && (open || visibleTabCount > 0)
+  // Stable identity lets memoized root surfaces skip the App render each workspace switch causes.
+  return useMemo(
+    () => ({
+      cancelReturnFocusFrame,
+      enabled,
+      open,
+      openMaximized,
+      setOpenWithFocus,
+      // Retain panes’ local state while closed once the floating workspace owns tabs.
+      shouldMountPanel,
+      showToggleButton,
+      tourInteractionSnapshotRef,
+      visibleTabCount
+    }),
+    [
+      cancelReturnFocusFrame,
+      enabled,
+      open,
+      openMaximized,
+      setOpenWithFocus,
+      shouldMountPanel,
+      showToggleButton,
+      visibleTabCount
+    ]
+  )
 }
