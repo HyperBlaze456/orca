@@ -10,6 +10,8 @@ import {
 import type { Store } from '../persistence'
 import { logStartupMilestone } from '../startup/startup-diagnostics'
 import { applyProxyToElectronUpdaterSession } from '../updater/electron-updater-proxy-session'
+import { updaterErrorMessage } from '../updater/updater-coded-error'
+import { updaterCodedMessage } from '../../shared/updater-failure-copy'
 import {
   checkForUpdatesFromMenu,
   dismissAvailableUpdate,
@@ -182,7 +184,7 @@ export function registerUpdaterHandlers(_store: Store): void {
       options?: { force?: boolean }
     ): Promise<ReleaseBuildListResult> => {
       if (!RELEASE_CHANNELS.includes(channel)) {
-        return { ok: false, channel, message: `Unknown release channel "${channel}".` }
+        return { ok: false, channel, ...updaterCodedMessage('unknownReleaseChannel', { channel }) }
       }
       try {
         return {
@@ -192,7 +194,7 @@ export function registerUpdaterHandlers(_store: Store): void {
         }
       } catch (error) {
         // Return expected network/rate-limit failures as data for the build picker.
-        return { ok: false, channel, message: String((error as Error)?.message ?? error) }
+        return { ok: false, channel, ...updaterErrorMessage(error) }
       }
     }
   )
