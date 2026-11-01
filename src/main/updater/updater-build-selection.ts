@@ -39,7 +39,7 @@ export abstract class UpdaterBuildSelection extends UpdaterMenuChecks {
     this.localBuildSelectionInProgress = true
     try {
       const { chooseLocalBuild } = await import('../local-builds/local-build-switch')
-      const candidate = await chooseLocalBuild(this.mainWindowRef)
+      const candidate = await chooseLocalBuild(this.getMainWindow)
       if (!candidate) {
         return
       }

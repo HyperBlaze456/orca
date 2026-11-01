@@ -2,7 +2,7 @@ import { app, ipcMain } from 'electron'
 import type { BrowserWindow, IpcMainInvokeEvent } from 'electron'
 import type { ReleaseBuildListResult, UpdateCheckOptions } from '../../shared/update-status-types'
 import { RELEASE_CHANNELS, type ReleaseChannel } from '../../shared/release-channel'
-import { isTrustedUIRenderer } from '../ipc/ui'
+import { getTrustedUIRendererWindow, isTrustedUIRenderer } from '../ipc/ui'
 import {
   readFollowedLocalBuildManifestPath,
   writeFollowedLocalBuildManifestPath
@@ -45,6 +45,7 @@ type UpdaterSetupHooks = {
 
 function buildUpdaterSetupOptions(store: Store, options?: UpdaterSetupHooks): UpdaterSetupOptions {
   return {
+    getMainWindow: getTrustedUIRendererWindow,
     getLastUpdateCheckAt: () => store.getUI().lastUpdateCheckAt,
     onBeforeQuit: async () => {
       try {
