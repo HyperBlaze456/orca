@@ -33,6 +33,7 @@ export type UpdaterSetupOptions = {
   setPendingUpdateNudgeId?: (id: string | null) => void
   setDismissedUpdateNudgeId?: (id: string | null) => void
   getReleaseChannelOverride?: () => ReleaseChannel | null
+  getUpdateDelayDays?: () => number
   /** Manifest a local build was last chosen from; newer builds there are staged without the picker. */
   getFollowedLocalBuildManifestPath?: () => Promise<string | null>
   setFollowedLocalBuildManifestPath?: (manifestPath: string | null) => Promise<void>
@@ -127,6 +128,7 @@ export class UpdaterSetup extends UpdaterLocalBuildFollow {
     this._setPendingUpdateNudgeId = opts?.setPendingUpdateNudgeId ?? null
     this._setDismissedUpdateNudgeId = opts?.setDismissedUpdateNudgeId ?? null
     this.getReleaseChannelOverride = opts?.getReleaseChannelOverride ?? null
+    this.getUpdateDelayDays = opts?.getUpdateDelayDays ?? null
     this.updateInstallMode = opts?.installMode ?? 'interactive'
     this.lastInstallDeferralVersion = { download: null, install: null }
 
