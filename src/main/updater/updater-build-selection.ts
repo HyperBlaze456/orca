@@ -73,6 +73,7 @@ export abstract class UpdaterBuildSelection extends UpdaterMenuChecks {
     this.clearPrereleaseFallbackContext()
     this.clearPublishingWindowLastGoodCheck()
     this.clearAvailableUpdateContext()
+    this.delayedUpdate = null
     this.activeUpdateNudgeId = null
     this.userInitiatedCheck = userInitiated
     this.sendStatus({ state: 'checking', ...(userInitiated ? { userInitiated: true } : {}) })
@@ -156,6 +157,7 @@ export abstract class UpdaterBuildSelection extends UpdaterMenuChecks {
       this.clearPrereleaseFallbackContext()
       this.clearPublishingWindowLastGoodCheck()
       this.clearAvailableUpdateContext()
+      this.delayedUpdate = null
       this.activeUpdateNudgeId = null
       this.userInitiatedCheck = true
       this.sendStatus({ state: 'checking', userInitiated: true })
