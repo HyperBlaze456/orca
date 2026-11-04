@@ -1,8 +1,9 @@
 import { setRuntimeBrowserCommandsFactory } from '../runtime/runtime-browser-commands-factory'
-import { markHostShuttingDown } from '../host-shutdown-state'
+import { markHostShuttingDown } from '../startup/quit/host-shutdown-state'
 import { setDesktopBrowserBridgeHostEnabled } from '../runtime/desktop-browser-bridge/desktop-browser-bridge-registry'
 import { ORCAD_MANAGED_ACTIVATION_ROOT_ENV } from '../../shared/orcad-managed-launch-env'
 import { startOrcadBrowserProvider } from './orcad-browser-startup'
+import { disposeTriviumServices } from '../trivium/trivium-service-supervisor'
 import { OrcadRuntimeLifetime, type OrcadRuntimeCleanup } from './orcad-runtime-lifetime'
 import type { OrcadManagedStopInstance } from '../../shared/orcad-stop-request'
 import { acquireOrcadInstanceLock } from './orcad-instance-lock'
@@ -149,6 +150,9 @@ export async function startOrcadWithHost<T extends object>(
       browserProvider = startOrcadBrowserProvider({ userDataPath })
       // Only managed hosts have opted-in desktop bridges; user-started hosts route to paired page hosts.
       setDesktopBrowserBridgeHostEnabled(Boolean(process.env[ORCAD_MANAGED_ACTIVATION_ROOT_ENV]))
+      // Why registered before the runtime's cleanups: cleanups run in reverse, so Trivium is
+      // disposed after rpc.stop() and no request can reopen the service before process exit.
+      registerCleanup(() => disposeTriviumServices())
       return { ...(await start(registerCleanup)), instance }
     },
     async (runtimeCleanupSucceeded) => {

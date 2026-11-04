@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { ActiveTerminalNoteTarget } from '@/lib/active-agent-note-target'
-import type { TuiAgent } from '../../../../shared/tui-agent'
+import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 
 export type TriviumSessionTarget = ActiveTerminalNoteTarget & { ptyId: string; title: string }
 

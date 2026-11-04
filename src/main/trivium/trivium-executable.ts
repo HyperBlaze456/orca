@@ -1,7 +1,7 @@
 import { isAbsolute } from 'node:path'
 import { hydrateShellPath, mergePathSegments } from '../startup/hydrate-shell-path'
 import { findExecutableOnPath, isExecutableFile } from '../startup/path-executable-lookup'
-import { resolvePathEnvKey } from '../pty/windows-path-segment-merge'
+import { resolvePathEnvKey } from '../pty/environment/windows-path-segment-merge'
 
 export type TriviumExecutableResolution =
   | { ok: true; program: string }

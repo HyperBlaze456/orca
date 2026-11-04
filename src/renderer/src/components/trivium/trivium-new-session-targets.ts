@@ -2,7 +2,7 @@ import {
   buildTabAgentLaunchOptions,
   orderTabLaunchAgents
 } from '@/components/tab-bar/tab-agent-launch-options'
-import type { TuiAgent } from '../../../../shared/tui-agent'
+import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import { triviumSessionTargetKey } from './trivium-session-state'
 
 /** An agent the composer can start a new session of; `key` is its select value. */
