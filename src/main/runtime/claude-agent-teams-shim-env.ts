@@ -10,7 +10,7 @@ import {
 import { getAppEnvironment, hasAppEnvironment } from '../../shared/app-environment'
 import { getOrcaCliCommandNameForPlatform } from '../../shared/orca-cli-command-name'
 import { getBundledLauncherPath } from '../cli/bundled-cli-launcher-path'
-import { resolvePathEnvKey } from '../pty/windows-path-segment-merge'
+import { resolvePathEnvKey } from '../pty/environment/windows-path-segment-merge'
 import { findExecutableOnPath, isExecutableFile } from '../startup/path-executable-lookup'
 
 export type ClaudeAgentTeamsLaunchPlan = {

@@ -8,7 +8,7 @@ import {
   sendNotesToActiveAgentSession
 } from '@/lib/active-agent-note-send'
 import { selectLivePtyIdsForWorktree } from '@/components/sidebar/worktree-card-status-inputs'
-import type { TuiAgent } from '../../../../shared/tui-agent'
+import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import { pickTriviumDefaultSessionTarget } from './trivium-new-session-targets'
 import {
   EMPTY_TRIVIUM_SESSION,
