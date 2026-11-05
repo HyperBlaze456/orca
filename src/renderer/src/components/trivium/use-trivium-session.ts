@@ -7,7 +7,7 @@ import {
   activeAgentNotesSendFailureMessage,
   sendNotesToActiveAgentSession
 } from '@/lib/active-agent-note-send'
-import { selectLivePtyIdsForWorktree } from '@/components/sidebar/worktree-card-status-inputs'
+import { selectLivePtyIdsForWorktree } from '@/components/sidebar/workspace-card/activity/worktree-card-status-inputs'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import { pickTriviumDefaultSessionTarget } from './trivium-new-session-targets'
 import {

@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
-import type { FolderWorkspace } from '../../../../shared/folder-workspace-types'
-import { makePaneKey } from '../../../../shared/stable-pane-id'
+import type { FolderWorkspace } from '../../../../shared/folder-workspaces/folder-workspace-types'
+import { makePaneKey } from '../../../../shared/workspace-layout/stable-pane-id'
 import type { TriviumStatusRpcResult } from '../../../../shared/trivium-workspace-status'
 import type { Worktree } from '../../../../shared/worktree/types'
 import { useAppStore } from '@/store'
