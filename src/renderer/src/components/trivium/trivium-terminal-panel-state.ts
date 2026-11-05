@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react'
 import { brandEphemeralSetupTerminalWorktreeId } from '../../../../shared/ephemeral-setup-terminal-worktree-id'
 import { parseExecutionHostId } from '../../../../shared/execution-host'
-import { WORKTREE_ID_SEPARATOR } from '../../../../shared/worktree/id'
+import { WORKTREE_ID_SEPARATOR } from '../../../../shared/terminal/pty/lifecycle/pty-session-id-format'
 import { translate } from '@/i18n/i18n'
 import { resolveTerminalWorktreeRoute } from '@/lib/terminal-worktree-route'
 import { getKnownExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'

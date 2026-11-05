@@ -4,7 +4,7 @@ import { StrictMode } from 'react'
 import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { FLOATING_TERMINAL_WORKTREE_ID, getDefaultSettings } from '../../../../shared/constants'
-import { resolveTerminalStartupCwdForWorkspace } from '../../../../shared/terminal-startup-cwd'
+import { resolveTerminalStartupCwdForWorkspace } from '../../../../shared/shell/launch/terminal-startup-cwd'
 import {
   getRepoIdFromWorktreeId,
   splitWorktreeIdForFilesystem
