@@ -7,8 +7,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDefaultSettings } from '../../../../shared/constants'
 import { makePaneKey } from '../../../../shared/workspace-layout/stable-pane-id'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
-import type * as LaunchAgentModule from '@/lib/launch-agent-in-new-tab'
-import type { LaunchAgentInNewTabResult } from '@/lib/launch-agent-in-new-tab-host-agents'
+import type * as LaunchAgentModule from '@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab'
+import type { LaunchAgentInNewTabResult } from '@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab-host-agents'
 import { useAppStore } from '@/store'
 import { G1_SYNC, G2 } from './trivium-model-tables.fixture'
 import {
@@ -46,7 +46,7 @@ vi.mock('@/hooks/useDetectedAgents', () => ({
 
 type LaunchAgentInNewTab = typeof LaunchAgentModule.launchAgentInNewTab
 const launch = vi.hoisted(() => vi.fn<LaunchAgentInNewTab>())
-vi.mock('@/lib/launch-agent-in-new-tab', async (importOriginal) => ({
+vi.mock('@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab', async (importOriginal) => ({
   ...(await importOriginal<typeof LaunchAgentModule>()),
   launchAgentInNewTab: launch
 }))

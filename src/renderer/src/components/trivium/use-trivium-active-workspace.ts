@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { getActiveSidebarWorkspaceId, parseWorkspaceKey } from '../../../../shared/workspace-scope'
 import { getFolderWorkspaceConnectionId } from '@/lib/folder-workspace-connection'
 import { useAppStore } from '@/store'
-import { useWorktreeById } from '@/store/selectors'
+import { useWorktreeById } from '@/store/workspaces/selection/use-selected-worktree'
 
 export type TriviumActiveWorkspace = {
   /** The runtime selector's bare id: a worktree id, or a `folder:<id>` key. */

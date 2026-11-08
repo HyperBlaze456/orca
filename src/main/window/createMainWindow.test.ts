@@ -9,6 +9,9 @@ vi.mock('./macos-tahoe-release', async () =>
 vi.mock('./desktop-integration/app-icon', async () =>
   (await import('./createMainWindow-test-harness')).appIconMock()
 )
+vi.mock('../browser-passwords/browser-password-guest-service', () => ({
+  attachBrowserPasswordGuest: vi.fn()
+}))
 vi.mock('../browser/browser-manager', async () =>
   (await import('./createMainWindow-test-harness')).browserManagerMock()
 )
@@ -216,7 +219,7 @@ describe('createMainWindow', () => {
     expect(allowBlankPrefs).toMatchObject({
       disableHtmlFullscreenWindowResize: true,
       partition: 'persist:orca-browser',
-      preload: expect.stringMatching(/browser-window-close-preload\.js$/),
+      preload: expect.stringMatching(/browser-guest-preload\.js$/),
       sandbox: true
     })
 
@@ -277,7 +280,7 @@ describe('createMainWindow', () => {
       untrustedPreloadParams as never
     )
     expect(untrustedPreloadParams.preload).toBeUndefined()
-    expect(hardenedPrefs.preload).toMatch(/browser-window-close-preload\.js$/)
+    expect(hardenedPrefs.preload).toMatch(/browser-guest-preload\.js$/)
     expect(hardenedPrefs.preload).not.toContain('untrusted-preload')
 
     const secondGuest = { marker: 'second-guest' }
@@ -447,9 +450,10 @@ describe('createMainWindow', () => {
 
     expect(webContents.setBackgroundThrottling).toHaveBeenCalledWith(true)
     expect(webContents.setBackgroundThrottling).not.toHaveBeenCalledWith(false)
-    expect(windowHandlers.get('restore')).toHaveLength(1)
-    expect(windowHandlers.get('show')).toHaveLength(1)
-    expect(windowHandlers.get('focus')).toHaveLength(1)
+    // Each: the repaint listener, then the window-activity relay (main-window-activity.ts).
+    expect(windowHandlers.get('restore')).toHaveLength(2)
+    expect(windowHandlers.get('show')).toHaveLength(2)
+    expect(windowHandlers.get('focus')).toHaveLength(2)
 
     windowHandlers.get('show')?.[0]?.()
     windowHandlers.get('restore')?.[0]?.()

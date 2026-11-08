@@ -9,7 +9,7 @@ import {
   getRepoIdFromWorktreeId,
   splitWorktreeIdForFilesystem
 } from '../../../../shared/worktree/id'
-import type { TerminalPaneProps } from '@/components/terminal-pane/terminal-pane-types'
+import type { TerminalPaneProps } from '@/components/terminal-pane/controller/terminal-pane-types'
 import { PASTE_TERMINAL_TEXT_EVENT, type PasteTerminalTextDetail } from '@/constants/terminal'
 import { toRuntimeTerminalWorktreeSelector } from '@/runtime/runtime-worktree-selector'
 import { useAppStore } from '@/store'
@@ -38,11 +38,13 @@ const { call, supports, paneMock } = vi.hoisted(() => ({
   supports: vi.fn(),
   paneMock: { ready: true }
 }))
-vi.mock('@/runtime/runtime-rpc-client', () => ({
-  callRuntimeRpc: call,
+vi.mock('@/runtime/rpc/calls/runtime-rpc-call', () => ({
+  callRuntimeRpc: call
+}))
+vi.mock('@/runtime/rpc/compatibility/runtime-capability-proof', () => ({
   runtimeEnvironmentSupportsCapability: supports
 }))
-vi.mock('@/runtime/runtime-file-watch-client', () => ({
+vi.mock('@/runtime/files/watching/runtime-file-watch-client', () => ({
   subscribeRuntimeFileChanges: vi.fn(async () => () => {})
 }))
 vi.mock('@/lib/focus-terminal-tab-surface', () => ({ focusTerminalTabSurface: vi.fn() }))

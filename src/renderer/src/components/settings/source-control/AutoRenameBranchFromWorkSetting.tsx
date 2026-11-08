@@ -69,24 +69,18 @@ export function AutoRenameBranchFromWorkSetting({
     config.actions,
     'branchName'
   )
-  const persistedBranchNameTemplateRef = useRef(persistedBranchNameTemplate)
-  persistedBranchNameTemplateRef.current = persistedBranchNameTemplate
   const [branchNameTemplateDraft, setBranchNameTemplateDraft] = useState(
     persistedBranchNameTemplate
   )
   const [isSavingPrompt, setIsSavingPrompt] = useState(false)
   const branchNamePromptDirty = branchNameTemplateDraft !== persistedBranchNameTemplate
 
-  useEffect(() => {
-    if (!branchNamePromptDirty) {
-      setBranchNameTemplateDraft(persistedBranchNameTemplate)
-    }
-  }, [branchNamePromptDirty, persistedBranchNameTemplate])
-
-  useEffect(() => {
-    setBranchNameTemplateDraft(persistedBranchNameTemplateRef.current)
-    // Settings owns discard confirmation; keep the draft here for row-specific save/discard controls.
-  }, [branchPromptDiscardSignal])
+  // Settings owns discard confirmation; keep the draft here for row-specific save/discard controls.
+  const [seenDiscardSignal, setSeenDiscardSignal] = useState(branchPromptDiscardSignal)
+  if (seenDiscardSignal !== branchPromptDiscardSignal) {
+    setSeenDiscardSignal(branchPromptDiscardSignal)
+    setBranchNameTemplateDraft(persistedBranchNameTemplate)
+  }
 
   useEffect(() => {
     onBranchPromptDirtyChange?.(branchNamePromptDirty)
@@ -145,7 +139,7 @@ export function AutoRenameBranchFromWorkSetting({
         'slug'
       ]}
       forceVisible={forceVisible || branchNamePromptDirty || advancedSearchOpen}
-      className="space-y-3 py-2"
+      className="space-y-3 py-3"
     >
       <div ref={setSettingRootRef} className="flex items-center justify-between gap-4">
         <div className="space-y-0.5">

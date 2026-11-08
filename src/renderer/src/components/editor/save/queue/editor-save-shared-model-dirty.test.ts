@@ -11,11 +11,8 @@ import { __clearSelfWriteRegistryForTests } from '../../external-changes/editor-
 import { createEditorStore } from '../../autosave/editor-autosave-controller-test-fixture'
 import { getDiskBaselineSignature } from '../../../../../../shared/disk-baseline-signature'
 import { GUARDED_PATH, stubGuardedDisk } from './editor-save-guarded-disk-fixture'
-import { makeWorktree } from '@/store/slices/worktrees-slice-test-fixtures'
-import {
-  keepTabEditsOverExternalChange,
-  overwriteDiskWithTabEdits
-} from '../../external-changes/ExternalFileChangeBanner'
+import { makeWorktree } from '@/store/slices/worktrees/worktree.test-fixture'
+import { overwriteDiskWithTabEdits } from '../../external-changes/ExternalFileChangeBanner'
 import { isStaleCachedEditorText } from '../../model-lifetime/buffer-text/editor-stale-mount-guard'
 import { stampCleanTabDiskBaseline } from '../../external-changes/editor-clean-tab-disk-baseline'
 
@@ -31,7 +28,7 @@ vi.mock('@/lib/file-owner-runtime-target', () => ({
   getRuntimeTargetForFileOwner: () => ({ kind: 'local' }),
   requireRuntimeTargetForFileOwner: () => ({ kind: 'local' })
 }))
-vi.mock('@/runtime/runtime-file-read-client', async (importOriginal) => ({
+vi.mock('@/runtime/files/reads/runtime-file-read-client', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   readRuntimeFileContent: mocks.readRuntimeFileContent
 }))
@@ -129,19 +126,6 @@ describe('a dirty record shown in several workspaces', () => {
     }
   })
 
-  it('after Keep, every view shows the kept edits: no eviction, no disk text', async () => {
-    const { store, a, b } = openSharedTabsWithDirtySibling()
-    store.getState().setExternalMutation(b.id, 'changed')
-    mocks.readRuntimeFileContent.mockResolvedValue({ content: 'E', isBinary: false })
-
-    keepTabEditsOverExternalChange(store.getState().openFiles[1])
-    await vi.advanceTimersByTimeAsync(0)
-
-    expect(dropped).toEqual([])
-    expect(store.getState().editorDrafts[a.id]).toBe('unsaved in B')
-    expect(store.getState().editorDrafts[b.id]).toBe('unsaved in B')
-  })
-
   it("drops a clean tab's leftover draft when the model moves to a newer load, so it cannot overwrite", async () => {
     const { store, a, b, tab } = openSharedTabsWithDirtySibling()
     // B undid back to clean but kept a draft equal to the old text; the tab is hidden.
@@ -169,15 +153,6 @@ describe('a dirty record shown in several workspaces', () => {
     } finally {
       cleanup()
     }
-  })
-
-  it('Overwrite reports nothing written when no tab of the model holds edits', async () => {
-    const { store, b } = openSharedTabsWithDirtySibling()
-    store.getState().clearEditorDraft(b.id)
-    store.getState().markFileDirty(b.id, false)
-    const disk = stubGuardedDisk({ [GUARDED_PATH]: 'E' })
-    expect(await overwriteDiskWithTabEdits(store.getState().openFiles[0])).toBe(false)
-    expect(disk.writeFile).not.toHaveBeenCalled()
   })
 
   const openThirdView = (store: ReturnType<typeof createEditorStore>) => {

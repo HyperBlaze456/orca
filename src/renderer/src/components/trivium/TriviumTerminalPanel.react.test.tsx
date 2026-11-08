@@ -2,7 +2,7 @@
 import '@testing-library/jest-dom/vitest'
 import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { TerminalPaneProps } from '@/components/terminal-pane/terminal-pane-types'
+import type { TerminalPaneProps } from '@/components/terminal-pane/controller/terminal-pane-types'
 import { PASTE_TERMINAL_TEXT_EVENT, type PasteTerminalTextDetail } from '@/constants/terminal'
 import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
 import { useAppStore } from '@/store'
@@ -33,11 +33,13 @@ const { call, supports, paneMock, workspaceMock } = vi.hoisted(() => ({
   /** Makes the active workspace's SSH owner unresolved (`connectionId: undefined`). */
   workspaceMock: { unresolved: false }
 }))
-vi.mock('@/runtime/runtime-rpc-client', () => ({
-  callRuntimeRpc: call,
+vi.mock('@/runtime/rpc/calls/runtime-rpc-call', () => ({
+  callRuntimeRpc: call
+}))
+vi.mock('@/runtime/rpc/compatibility/runtime-capability-proof', () => ({
   runtimeEnvironmentSupportsCapability: supports
 }))
-vi.mock('@/runtime/runtime-file-watch-client', () => ({
+vi.mock('@/runtime/files/watching/runtime-file-watch-client', () => ({
   subscribeRuntimeFileChanges: vi.fn(async () => () => {})
 }))
 vi.mock('@/lib/focus-terminal-tab-surface', () => ({ focusTerminalTabSurface: vi.fn() }))

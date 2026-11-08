@@ -8,10 +8,10 @@ import { FLOATING_TERMINAL_WORKTREE_ID, getDefaultSettings } from '../../../../s
 import { isEphemeralSetupTerminalWorktreeId } from '../../../../shared/ephemeral-setup-terminal-worktree-id'
 import { makePaneKey } from '../../../../shared/workspace-layout/stable-pane-id'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
-import type * as LaunchAgentModule from '@/lib/launch-agent-in-new-tab'
-import type { LaunchAgentInNewTabArgs } from '@/lib/launch-agent-in-new-tab'
-import type { LaunchAgentInNewTabResult } from '@/lib/launch-agent-in-new-tab-host-agents'
-import { settleAgentLaunchPaneStart } from '@/lib/agent-launch-pane-start'
+import type * as LaunchAgentModule from '@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab'
+import type { LaunchAgentInNewTabArgs } from '@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab-args'
+import type { LaunchAgentInNewTabResult } from '@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab-host-agents'
+import { settleAgentLaunchPaneStart } from '@/lib/agent-session/launch/pane/agent-launch-pane-start'
 import { useAppStore } from '@/store'
 import { G2 } from './trivium-model-tables.fixture'
 import {
@@ -53,7 +53,7 @@ const launcher = vi.hoisted(() => {
   } = { launch: vi.fn<LaunchAgentInNewTab>(), actual: null }
   return box
 })
-vi.mock('@/lib/launch-agent-in-new-tab', async (importOriginal) => {
+vi.mock('@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab', async (importOriginal) => {
   const actual = await importOriginal<typeof LaunchAgentModule>()
   launcher.actual = actual.launchAgentInNewTab
   return { ...actual, launchAgentInNewTab: launcher.launch }

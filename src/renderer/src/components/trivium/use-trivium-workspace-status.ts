@@ -7,13 +7,13 @@ import { selectEditorExternalWatchTargets } from '@/hooks/editor-external-watch-
 import {
   getExecutionHostIdForWorktree,
   runtimeEnvironmentIdOrLocalUnlessTwin
-} from '@/lib/worktree-runtime-owner'
+} from '@/lib/workspace/ownership/worktree-runtime-owner'
 import {
   runtimeRpcTargetForAuthorityKey,
   runtimeTargetForOwnerEnvironment
-} from '@/runtime/runtime-client-target'
+} from '@/runtime/rpc/targets/runtime-client-target'
 import type { RuntimeClientTarget } from '../../../../shared/runtime-client-target'
-import { subscribeRuntimeFileChanges } from '@/runtime/runtime-file-watch-client'
+import { subscribeRuntimeFileChanges } from '@/runtime/files/watching/runtime-file-watch-client'
 import { readTriviumWorkspaceProjection } from './trivium-workspace-query'
 import { useAppStore } from '@/store'
 
