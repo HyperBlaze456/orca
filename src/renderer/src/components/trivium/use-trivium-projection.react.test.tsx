@@ -5,8 +5,10 @@ import { useAppStore } from '@/store'
 import { useTriviumProjection } from './use-trivium-projection'
 
 const { call, supports } = vi.hoisted(() => ({ call: vi.fn(), supports: vi.fn(async () => true) }))
-vi.mock('@/runtime/runtime-rpc-client', () => ({
-  callRuntimeRpc: call,
+vi.mock('@/runtime/rpc/calls/runtime-rpc-call', () => ({
+  callRuntimeRpc: call
+}))
+vi.mock('@/runtime/rpc/compatibility/runtime-capability-proof', () => ({
   runtimeEnvironmentSupportsCapability: supports
 }))
 

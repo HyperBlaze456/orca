@@ -20,12 +20,14 @@ const callRuntimeRpcMock = vi.hoisted(() => vi.fn())
 const subscribeRuntimeFileChangesMock = vi.hoisted(() => vi.fn())
 const supportsCapabilityMock = vi.hoisted(() => vi.fn(async () => true))
 
-vi.mock('@/runtime/runtime-rpc-client', () => ({
-  callRuntimeRpc: callRuntimeRpcMock,
+vi.mock('@/runtime/rpc/calls/runtime-rpc-call', () => ({
+  callRuntimeRpc: callRuntimeRpcMock
+}))
+vi.mock('@/runtime/rpc/compatibility/runtime-capability-proof', () => ({
   runtimeEnvironmentSupportsCapability: supportsCapabilityMock
 }))
 
-vi.mock('@/runtime/runtime-file-watch-client', () => ({
+vi.mock('@/runtime/files/watching/runtime-file-watch-client', () => ({
   subscribeRuntimeFileChanges: subscribeRuntimeFileChangesMock
 }))
 

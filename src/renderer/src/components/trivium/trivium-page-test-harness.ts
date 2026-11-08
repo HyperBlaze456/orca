@@ -14,7 +14,7 @@ import type { TriviumFixtureBinary } from './trivium-model-tables.fixture'
 import { useTriviumSessionState } from './trivium-session-state'
 
 // Page tests render the real TriviumPage against WO-1a's real-shaped fixture; each test file
-// mocks `@/runtime/runtime-rpc-client` and routes `callRuntimeRpc` through `pageRpc`.
+// mocks `@/runtime/rpc/calls/runtime-rpc-call` and routes `callRuntimeRpc` through `pageRpc`.
 
 export const PAGE_WORKTREE_ID = 'wt-1'
 export const PAGE_WORKTREE_PATH = '/srv/acme'

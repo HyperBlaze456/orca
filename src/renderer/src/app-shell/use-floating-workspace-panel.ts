@@ -14,7 +14,7 @@ import { createFloatingWorkspaceTourInteractionSnapshot } from '@/lib/floating-w
 import { persistFloatingTerminalPanelOpen } from '../components/floating-terminal/floating-terminal-panel-view-state'
 import { selectFloatingTerminalTriggerVisible } from '../components/floating-terminal/floating-terminal-trigger-visibility'
 import { useAppStore } from '../store'
-import { selectFloatingVisibleTabCount } from '../store/selectors'
+import { selectFloatingVisibleTabCount } from '../store/workspaces/floating/floating-workspace-panel-selector'
 
 export type FloatingWorkspacePanelState = ReturnType<typeof useFloatingWorkspacePanel>
 

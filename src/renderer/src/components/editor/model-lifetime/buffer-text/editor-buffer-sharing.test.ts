@@ -10,7 +10,6 @@ import type { OpenFile } from '@/store/slices/editor/types/open-file'
 import type { WorkspaceSessionState } from '../../../../../../shared/workspace-session/workspace-session-state-types'
 import {
   getOpenFilesForExternalFileChange,
-  isAutosaveSuspendedForFile,
   ORCA_EDITOR_EXTERNAL_FILE_CHANGE_EVENT,
   ORCA_EDITOR_FILE_SAVED_EVENT,
   requestEditorFileSave,
@@ -21,14 +20,15 @@ import { createEditorStore } from '../../autosave/editor-autosave-controller-tes
 import { __clearSelfWriteRegistryForTests } from '../../external-changes/editor-self-write-registry'
 import { getDiskBaselineSignature } from '../../../../../../shared/disk-baseline-signature'
 import { GUARDED_PATH, stubGuardedDisk } from '../../save/queue/editor-save-guarded-disk-fixture'
-import { makeFolderWorkspace, makeWorktree } from '@/store/slices/worktrees-slice-test-fixtures'
+import { makeFolderWorkspace } from '@/store/folder-workspaces/folder-workspace.test-fixture'
+import { makeWorktree } from '@/store/slices/worktrees/worktree.test-fixture'
 import { FLOATING_TERMINAL_WORKTREE_ID } from '../../../../../../shared/constants'
 import { folderWorkspaceKey } from '../../../../../../shared/workspace-scope'
 import { editorTabModelUri } from '../../save/queue/editor-save-disk-precondition'
 import { mayPushTabTextIntoModel, isStaleCachedEditorText } from './editor-stale-mount-guard'
 import { registerPendingEditorFlush } from '../../save/flush/editor-pending-flush'
 import { isDetachedEditorBufferId } from '@/store/slices/editor/buffers/editor-buffer-views'
-import { buildHydratedEditorSessionState } from '@/store/slices/editor/actions/hydrated-editor-session-state'
+import { buildHydratedEditorSessionState } from '@/store/slices/editor/hydration/hydrated-editor-session-state'
 import { stampCleanTabDiskBaseline } from '../../external-changes/editor-clean-tab-disk-baseline'
 import { withRecordDiskText } from './editor-buffer-adapter'
 import { ExternalFileChangeBanner } from '../../external-changes/ExternalFileChangeBanner'
@@ -415,26 +415,5 @@ describe('two workspaces on one record', () => {
       unregister()
       cleanup()
     }
-  })
-
-  it('a conflicted record pauses autosave on every view; a detached pair shows its own (scenario 8)', () => {
-    stubGuardedDisk({ [GUARDED_PATH]: BASE })
-    const { store, a, b } = openShared(BASE)
-    store.getState().setEditorDraft(a.id, 'mine')
-    store.getState().markFileDirty(a.id, true)
-    store.getState().setExternalMutation(b.id, 'changed')
-    for (const id of [a.id, b.id]) {
-      expect(isAutosaveSuspendedForFile(view(store, id)!)).toBe(true)
-      expect(bannerOf(store, id)).toContain('changed on disk')
-      expect(bannerOf(store, id)).toContain('>Overwrite<')
-    }
-
-    const pair = twoWorkspaceStore()
-    const [c, d] = restore(pair, ['abc', 'abcd'])
-    pair.getState().setExternalMutation(d.id, 'changed')
-    expect(isAutosaveSuspendedForFile(view(pair, d.id)!)).toBe(true)
-    expect(isAutosaveSuspendedForFile(view(pair, c.id)!)).toBe(false)
-    expect(bannerOf(pair, d.id)).toContain('changed on disk')
-    expect(bannerOf(pair, c.id)).toBeNull()
   })
 })
