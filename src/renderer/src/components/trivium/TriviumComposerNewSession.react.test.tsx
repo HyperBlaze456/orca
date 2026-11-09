@@ -453,7 +453,8 @@ describe('composer launch with the real store', () => {
     await clickSend()
     const launched = launcher.launch.mock.results[0]
     const result = launched?.type === 'return' ? launched.value : null
-    const tabId = result?.surface.kind === 'local-terminal' ? result.surface.tabId : null
+    const surface = result && 'surface' in result ? result.surface : null
+    const tabId = surface?.kind === 'local-terminal' ? surface.tabId : null
     expect(tabId).not.toBeNull()
     expect(tabOwners(tabId ?? '')).toEqual([workspaceId])
     const owners = Object.keys(useAppStore.getState().tabsByWorktree)

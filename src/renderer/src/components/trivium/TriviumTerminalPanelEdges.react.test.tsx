@@ -11,7 +11,7 @@ import {
 } from '../../../../shared/worktree/id'
 import type { TerminalPaneProps } from '@/components/terminal-pane/controller/terminal-pane-types'
 import { PASTE_TERMINAL_TEXT_EVENT, type PasteTerminalTextDetail } from '@/constants/terminal'
-import { toRuntimeTerminalWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+import { toRuntimeTerminalWorktreeSelector } from '@/runtime/rpc/targets/runtime-worktree-selector'
 import { useAppStore } from '@/store'
 import type { AppState } from '@/store/types'
 import { fixtureApproveCommand } from './trivium-model-tables.fixture'

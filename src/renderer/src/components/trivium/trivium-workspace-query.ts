@@ -2,7 +2,7 @@ import { TRIVIUM_WORKSPACE_RUNTIME_CAPABILITY } from '../../../../shared/protoco
 import { callRuntimeRpc } from '@/runtime/rpc/calls/runtime-rpc-call'
 import { runtimeEnvironmentSupportsCapability } from '@/runtime/rpc/compatibility/runtime-capability-proof'
 import type { RuntimeClientTarget } from '../../../../shared/runtime-client-target'
-import { toRuntimeWorktreeSelector } from '@/runtime/runtime-worktree-selector'
+import { toRuntimeWorktreeSelector } from '@/runtime/rpc/targets/runtime-worktree-selector'
 
 export async function readTriviumWorkspaceProjection<T>(
   target: RuntimeClientTarget,

@@ -4,7 +4,10 @@ import { useDetectedAgents } from '@/hooks/useDetectedAgents'
 import { translate } from '@/i18n/i18n'
 import { newAgentLaunchRequestId } from '@/lib/agent-session/launch/routing/agent-launch-request-id'
 import { launchAgentInNewTab } from '@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab'
-import type { LaunchAgentInNewTabResult } from '@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab-host-agents'
+import type {
+  AgentTabLaunchOutcome,
+  LaunchAgentInNewTabResult
+} from '@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab-host-agents'
 import { useAppStore } from '@/store'
 import { DEFAULT_DISABLED_TUI_AGENTS } from '../../../../shared/agent-launch/catalog/tui-agent-selection'
 import {
@@ -100,7 +103,7 @@ export function useTriviumAgentLaunch(
       error: null,
       notice: translate('trivium.composer.starting', 'Starting {{agent}}…', { agent })
     })
-    let result: LaunchAgentInNewTabResult = null
+    let result: AgentTabLaunchOutcome = null
     try {
       const groupId = useAppStore.getState().activeGroupIdByWorktree[workspaceId]
       result = launchAgentInNewTab({
@@ -116,6 +119,14 @@ export function useTriviumAgentLaunch(
     }
     if (!result) {
       update(sessionKey, { sending: false, ...couldNotStart(agent) })
+      return
+    }
+    // Why: upstream may refuse a launch (host unavailable); the launch action already notified.
+    if ('refused' in result) {
+      update(sessionKey, {
+        sending: false,
+        ...(result.recovery ? { error: result.recovery, notice: null } : couldNotStart(agent))
+      })
       return
     }
     if (result.surface.kind !== 'host-published') {
