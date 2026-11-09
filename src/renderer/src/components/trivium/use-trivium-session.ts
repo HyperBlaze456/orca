@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { useAppStore } from '@/store'
 import { deriveNotesSendAgentTargets } from '@/lib/notes-send-agent-targets'
-import type { StructuredChatTabNames } from '@/runtime/structured-chat-tab-name'
+import type { StructuredChatTabNames } from '@/runtime/native-chat/naming/structured-chat-tab-name'
 import {
   activeAgentNotesSendFailureMessage,
   sendNotesToActiveAgentSession
