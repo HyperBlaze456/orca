@@ -1,12 +1,10 @@
 import { useEffect, useMemo } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { useAppStore } from '@/store'
-import { deriveNotesSendAgentTargets } from '@/lib/notes-send-agent-targets'
+import { deriveNotesSendAgentTargets } from '@/lib/agent-session/messaging/notes-send-agent-targets'
 import type { StructuredChatTabNames } from '@/runtime/native-chat/naming/structured-chat-tab-name'
-import {
-  activeAgentNotesSendFailureMessage,
-  sendNotesToActiveAgentSession
-} from '@/lib/active-agent-note-send'
+import { sendNotesToActiveAgentSession } from '@/lib/agent-session/messaging/terminal/active-agent-note-send'
+import { activeAgentNotesSendFailureMessage } from '@/lib/agent-session/messaging/terminal/active-agent-note-send-result'
 import { selectLivePtyIdsForWorktree } from '@/components/sidebar/workspace-card/activity/worktree-card-status-inputs'
 import type { TuiAgent } from '../../../../shared/agent-launch/catalog/tui-agent'
 import { pickTriviumDefaultSessionTarget } from './trivium-new-session-targets'

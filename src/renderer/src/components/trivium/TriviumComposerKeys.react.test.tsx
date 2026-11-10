@@ -14,8 +14,10 @@ import { TriviumComposer } from './TriviumComposer'
 // Verifier (WO-3 r1): keyboard edges, an agent that cannot take a request, and failures.
 
 const send = vi.hoisted(() => vi.fn())
-vi.mock('@/lib/active-agent-note-send', () => ({
-  sendNotesToActiveAgentSession: send,
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send', () => ({
+  sendNotesToActiveAgentSession: send
+}))
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send-result', () => ({
   activeAgentNotesSendFailureMessage: () => 'Session unavailable'
 }))
 

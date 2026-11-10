@@ -13,7 +13,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { translate } from '@/i18n/i18n'
-import { AgentIcon } from '@/lib/agent-catalog'
+import { AgentIcon } from '@/components/agent/icons/AgentIcon'
 import {
   isImeOwnedKeyboardEvent,
   useImeEnterGestureOwnership
