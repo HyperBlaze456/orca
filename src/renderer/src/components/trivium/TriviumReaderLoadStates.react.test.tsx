@@ -23,8 +23,10 @@ import type { TriviumRoute } from './use-trivium-navigation'
 // AXIS A8: a count or state that depends on ticket records never reads as "no work done"
 // while those records are loading or after they failed.
 
-vi.mock('@/lib/active-agent-note-send', () => ({
-  sendNotesToActiveAgentSession: vi.fn(),
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send', () => ({
+  sendNotesToActiveAgentSession: vi.fn()
+}))
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send-result', () => ({
   activeAgentNotesSendFailureMessage: () => 'Session unavailable'
 }))
 

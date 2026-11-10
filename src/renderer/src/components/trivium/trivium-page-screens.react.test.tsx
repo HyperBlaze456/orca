@@ -35,8 +35,10 @@ vi.mock('@/runtime/rpc/compatibility/runtime-capability-proof', () => ({
 vi.mock('@/runtime/files/watching/runtime-file-watch-client', () => ({
   subscribeRuntimeFileChanges: vi.fn(async () => () => {})
 }))
-vi.mock('@/lib/active-agent-note-send', () => ({
-  sendNotesToActiveAgentSession: send,
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send', () => ({
+  sendNotesToActiveAgentSession: send
+}))
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send-result', () => ({
   activeAgentNotesSendFailureMessage: () => 'Session unavailable'
 }))
 

@@ -25,8 +25,10 @@ import { TriviumComposer } from './TriviumComposer'
 // Verifier (WO-6 r1): races, workspace switches, unmounts and copy edges of new-session launch.
 
 const send = vi.hoisted(() => vi.fn())
-vi.mock('@/lib/active-agent-note-send', () => ({
-  sendNotesToActiveAgentSession: send,
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send', () => ({
+  sendNotesToActiveAgentSession: send
+}))
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send-result', () => ({
   activeAgentNotesSendFailureMessage: () => 'Session unavailable'
 }))
 

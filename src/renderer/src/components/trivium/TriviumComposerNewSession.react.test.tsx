@@ -26,8 +26,10 @@ import { useTriviumSessionState } from './trivium-session-state'
 import { TriviumComposer } from './TriviumComposer'
 
 const send = vi.hoisted(() => vi.fn())
-vi.mock('@/lib/active-agent-note-send', () => ({
-  sendNotesToActiveAgentSession: send,
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send', () => ({
+  sendNotesToActiveAgentSession: send
+}))
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send-result', () => ({
   activeAgentNotesSendFailureMessage: () => 'Session unavailable'
 }))
 
@@ -61,7 +63,7 @@ vi.mock('@/lib/agent-session/launch/new-tab/launch-agent-in-new-tab', async (imp
 
 // Stands in for the PTY: the real launch pastes the prompt once the agent is ready.
 const paste = vi.hoisted(() => vi.fn())
-vi.mock('@/lib/agent-paste-draft', async (importOriginal) => ({
+vi.mock('@/lib/agent-session/messaging/paste/agent-paste-draft', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   pasteDraftWhenAgentReady: paste
 }))

@@ -25,8 +25,10 @@ import { useTriviumNavigation } from './use-trivium-navigation'
 // loading/error placeholders on every page.
 
 const send = vi.hoisted(() => vi.fn())
-vi.mock('@/lib/active-agent-note-send', () => ({
-  sendNotesToActiveAgentSession: send,
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send', () => ({
+  sendNotesToActiveAgentSession: send
+}))
+vi.mock('@/lib/agent-session/messaging/terminal/active-agent-note-send-result', () => ({
   activeAgentNotesSendFailureMessage: () => 'Session unavailable'
 }))
 
