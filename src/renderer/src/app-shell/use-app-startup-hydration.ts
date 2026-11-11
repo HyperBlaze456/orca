@@ -1,9 +1,9 @@
 import { restoreStructuredLaunchSurfaces } from '@/lib/agent-session/launch/structured-agent-session-launch-surface'
 import { useEffect, useRef } from 'react'
 import { restoreLocalStructuredChatsAtStartup } from '@/runtime/native-chat/local-sessions/local-structured-chats'
-import { syncZoomCSSVar } from '@/lib/ui-zoom'
+import { syncZoomCSSVar } from '@/app-shell/chrome/ui-zoom'
 import { installCodexDetachedPaneRestartExecutor } from '@/components/terminal-pane/account-restart/detached/codex-detached-pane-restart-scheduler'
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/index'
 import { reconcileHydratedWorkspaceTabModels } from './reconcile-hydrated-workspace-tab-models'
 import { useStartupActions } from './use-app-startup-actions'
 import { waitForNativeChatDraftsAtStartup } from './native-chat-draft-startup'
@@ -14,7 +14,7 @@ import {
   collectFolderWorkspaceKeysFromSession,
   collectWorktreeHydrationRepoIdsFromSession
 } from '../lib/workspace/persistence/workspace-session-hydration-keys'
-import { hydratePersistedUIAfterStartupRead } from '../lib/startup-ui-hydration'
+import { hydratePersistedUIAfterStartupRead } from './startup/startup-ui-hydration'
 import {
   logRendererStartupDiagnostic,
   timeRendererStartupStep,

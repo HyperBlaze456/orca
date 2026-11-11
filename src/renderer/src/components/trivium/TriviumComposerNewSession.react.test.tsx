@@ -69,7 +69,7 @@ vi.mock('@/lib/agent-session/messaging/paste/agent-paste-draft', async (importOr
 }))
 
 const focusTerminal = vi.hoisted(() => vi.fn())
-vi.mock('@/lib/focus-terminal-tab-surface', () => ({ focusTerminalTabSurface: focusTerminal }))
+vi.mock('@/components/terminal-pane/input/focus/focus-terminal-tab-surface', () => ({ focusTerminalTabSurface: focusTerminal }))
 
 const { model } = makeReaderFixture()
 const FOLDER_ID = 'folder:notes-1'

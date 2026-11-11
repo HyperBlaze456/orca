@@ -1,5 +1,5 @@
 import { PASTE_TERMINAL_TEXT_EVENT, type PasteTerminalTextDetail } from '@/constants/terminal'
-import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
+import { focusTerminalTabSurface } from '@/components/terminal-pane/input/focus/focus-terminal-tab-surface'
 
 // Same readiness rule as the onboarding inline terminal: rendered rows, or a PTY that has
 // existed briefly (GPU renderers may never expose row text).

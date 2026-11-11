@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { TriviumLoadState, TriviumReaderNeed } from './trivium-reader-load'
 
 /** A quiet placeholder bar for one value that is still loading. */

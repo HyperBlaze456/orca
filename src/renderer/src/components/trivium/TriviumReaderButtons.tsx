@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ComponentProps } from 'r
 import { Check, Copy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 const COPIED_FEEDBACK_MS = 1500
 

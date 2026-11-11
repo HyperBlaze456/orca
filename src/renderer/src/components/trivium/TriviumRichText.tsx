@@ -1,5 +1,5 @@
 import { Fragment, type ReactNode } from 'react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { parseTriviumTextParagraphs, type TriviumTextSegment } from './trivium-rich-text'
 
 /** Orca's inline-code treatment, sized relative to the surrounding text. */

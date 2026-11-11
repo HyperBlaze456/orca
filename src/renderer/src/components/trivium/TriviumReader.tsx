@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, type ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { TriviumChange } from './trivium-change-markers'
 import type { TriviumModel } from './trivium-goal-model'
 import type { TriviumTreeEntry } from './trivium-goal-tree'

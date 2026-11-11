@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { TriviumLoadState } from './trivium-reader-load'
 import { TriviumProgressRing } from './TriviumIcons'
 
