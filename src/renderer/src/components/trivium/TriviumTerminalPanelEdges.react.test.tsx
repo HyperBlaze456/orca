@@ -47,7 +47,7 @@ vi.mock('@/runtime/rpc/compatibility/runtime-capability-proof', () => ({
 vi.mock('@/runtime/files/watching/runtime-file-watch-client', () => ({
   subscribeRuntimeFileChanges: vi.fn(async () => () => {})
 }))
-vi.mock('@/lib/focus-terminal-tab-surface', () => ({ focusTerminalTabSurface: vi.fn() }))
+vi.mock('@/components/terminal-pane/input/focus/focus-terminal-tab-surface', () => ({ focusTerminalTabSurface: vi.fn() }))
 vi.mock('@/components/terminal-pane/TerminalPane', () => ({
   default: (props: TerminalPaneProps) => (
     <div

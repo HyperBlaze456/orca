@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState, type MouseEvent, type ReactNode } from 'react'
 import { ChevronRight } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { TriviumChange } from './trivium-change-markers'
 import type { TriviumModel } from './trivium-goal-model'
 import type { TriviumTicketGroupEntry } from './trivium-goal-tree'

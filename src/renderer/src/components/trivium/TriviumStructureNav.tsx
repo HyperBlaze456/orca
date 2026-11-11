@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Clock, Inbox } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { TriviumNavigation } from './use-trivium-navigation'
 
 function TriviumStructureNavRow({

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Bell } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 
 // Same six strings as the model's TriviumTicketKind; declared here so the icons stay model-free.
 export type TriviumTicketStatusIconKind =

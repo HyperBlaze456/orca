@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from 'react'
 import { GitMerge } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { shortTriviumSha } from './trivium-harness-text'
 
 export type TriviumReaderPillTone = 'default' | 'blocked' | 'decision' | 'new'

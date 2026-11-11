@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { TriviumReaderQuietButton } from './TriviumReaderButtons'
 import { TriviumRichText } from './TriviumRichText'
 

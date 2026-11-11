@@ -1,7 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { TriviumMemoryDelta } from './trivium-progress-records'
 import { formatTriviumCount } from './trivium-reader-text'
 import { TriviumReaderExpandableText } from './TriviumReaderClamp'

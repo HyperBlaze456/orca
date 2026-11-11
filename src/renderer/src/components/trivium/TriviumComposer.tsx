@@ -17,8 +17,8 @@ import { AgentIcon } from '@/components/agent/icons/AgentIcon'
 import {
   isImeOwnedKeyboardEvent,
   useImeEnterGestureOwnership
-} from '@/lib/ime-composition-keyboard-event'
-import { cn } from '@/lib/utils'
+} from '@/lib/text-input/ime/ime-composition-keyboard-event'
+import { cn } from '@/lib/class-names'
 import { useAppStore } from '@/store'
 import {
   buildTriviumComposerPrompt,

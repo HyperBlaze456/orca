@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { TriangleAlert } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import type { TriviumModel } from './trivium-goal-model'
 import { triviumCampaignPhaseLabel, triviumIdSlug } from './trivium-harness-text'
 import type { TriviumProgressMilestone } from './trivium-progress-records'

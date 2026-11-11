@@ -3,7 +3,7 @@ import { brandEphemeralSetupTerminalWorktreeId } from '../../../../shared/epheme
 import { parseExecutionHostId } from '../../../../shared/execution-host'
 import { WORKTREE_ID_SEPARATOR } from '../../../../shared/terminal/pty/lifecycle/pty-session-id-format'
 import { translate } from '@/i18n/i18n'
-import { resolveTerminalWorktreeRoute } from '@/lib/terminal-worktree-route'
+import { resolveTerminalWorktreeRoute } from '@/lib/workspace/ownership/terminal-worktree-route'
 import { getKnownExecutionHostIdForWorktree } from '@/lib/workspace/ownership/worktree-runtime-owner'
 import { useAppStore } from '@/store'
 import { readTriviumPageStorage, writeTriviumPageStorage } from './trivium-page-storage'

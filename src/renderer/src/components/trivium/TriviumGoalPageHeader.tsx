@@ -1,7 +1,7 @@
 import { ArrowUp } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/class-names'
 import { describeTriviumChange, type TriviumChange } from './trivium-change-markers'
 import type { TriviumModel } from './trivium-goal-model'
 import { triviumTierName } from './trivium-harness-text'
